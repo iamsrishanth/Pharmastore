@@ -2,9 +2,9 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { supplierSchema } from '@/lib/validation';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
 
-export async function getSuppliers() {
+async function fetchSuppliersFromDb() {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -18,6 +18,18 @@ export async function getSuppliers() {
     console.error('Error fetching suppliers:', error);
     return [];
   }
+}
+
+const getCachedSuppliers = unstable_cache(
+  async () => {
+    return fetchSuppliersFromDb();
+  },
+  ['suppliers-list'],
+  { revalidate: 60, tags: ['suppliers'] }
+);
+
+export async function getSuppliers() {
+  return getCachedSuppliers();
 }
 
 export async function createSupplier(prevState: any, data: any) {
@@ -34,6 +46,7 @@ export async function createSupplier(prevState: any, data: any) {
       return { error: error.message };
     }
 
+    revalidateTag('suppliers', 'max');
     revalidatePath('/admin/suppliers');
     return { success: true };
   } catch (error: any) {
@@ -58,6 +71,7 @@ export async function updateSupplier(id: string, prevState: any, data: any) {
       return { error: error.message };
     }
 
+    revalidateTag('suppliers', 'max');
     revalidatePath('/admin/suppliers');
     return { success: true };
   } catch (error: any) {
@@ -72,6 +86,7 @@ export async function deleteSupplier(id: string) {
 
     if (error) throw error;
 
+    revalidateTag('suppliers', 'max');
     revalidatePath('/admin/suppliers');
     return { success: true };
   } catch (error: any) {

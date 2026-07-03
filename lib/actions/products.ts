@@ -2,15 +2,14 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { productSchema } from '@/lib/validation';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
 
-export async function getProducts(searchQuery?: string) {
+async function fetchProductsFromDb(searchQuery?: string) {
   try {
     const supabase = await createClient();
     let query = supabase.from('products').select('*').order('name', { ascending: true });
 
     if (searchQuery) {
-      // If it contains only digits, match barcode or name
       if (/^\d+$/.test(searchQuery)) {
         query = query.or(`barcode.eq.${searchQuery},name.ilike.%${searchQuery}%`);
       } else {
@@ -25,6 +24,21 @@ export async function getProducts(searchQuery?: string) {
     console.error('Error fetching products:', error);
     return [];
   }
+}
+
+const getCachedProducts = unstable_cache(
+  async () => {
+    return fetchProductsFromDb();
+  },
+  ['products-list'],
+  { revalidate: 60, tags: ['products'] }
+);
+
+export async function getProducts(searchQuery?: string) {
+  if (searchQuery) {
+    return fetchProductsFromDb(searchQuery);
+  }
+  return getCachedProducts();
 }
 
 export async function createProduct(prevState: any, data: any) {
@@ -44,6 +58,7 @@ export async function createProduct(prevState: any, data: any) {
       return { error: error.message };
     }
 
+    revalidateTag('products', 'max');
     revalidatePath('/admin/products');
     revalidatePath('/employee/stock');
     return { success: true };
@@ -72,6 +87,7 @@ export async function updateProduct(id: string, prevState: any, data: any) {
       return { error: error.message };
     }
 
+    revalidateTag('products', 'max');
     revalidatePath('/admin/products');
     revalidatePath('/employee/stock');
     return { success: true };
@@ -87,6 +103,7 @@ export async function deleteProduct(id: string) {
 
     if (error) throw error;
 
+    revalidateTag('products', 'max');
     revalidatePath('/admin/products');
     revalidatePath('/employee/stock');
     return { success: true };

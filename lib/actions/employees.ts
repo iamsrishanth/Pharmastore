@@ -2,9 +2,9 @@
 
 import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { employeeSchema } from '@/lib/validation';
-import { revalidatePath } from 'next/cache';
+import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
 
-export async function getEmployees() {
+async function fetchEmployeesFromDb() {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
@@ -18,6 +18,18 @@ export async function getEmployees() {
     console.error('Error fetching employees:', error);
     return [];
   }
+}
+
+const getCachedEmployees = unstable_cache(
+  async () => {
+    return fetchEmployeesFromDb();
+  },
+  ['employees-list'],
+  { revalidate: 60, tags: ['employees'] }
+);
+
+export async function getEmployees() {
+  return getCachedEmployees();
 }
 
 export async function createEmployee(prevState: any, data: any) {
@@ -70,6 +82,7 @@ export async function createEmployee(prevState: any, data: any) {
       return { error: profileError.message };
     }
 
+    revalidateTag('employees', 'max');
     revalidatePath('/admin/employees');
     return { success: true };
   } catch (error: any) {
@@ -116,6 +129,7 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
       return { error: profileError.message };
     }
 
+    revalidateTag('employees', 'max');
     revalidatePath('/admin/employees');
     return { success: true };
   } catch (error: any) {
@@ -133,6 +147,7 @@ export async function toggleEmployeeStatus(id: string, isActive: boolean) {
 
     if (error) throw error;
 
+    revalidateTag('employees', 'max');
     revalidatePath('/admin/employees');
     return { success: true };
   } catch (error: any) {
