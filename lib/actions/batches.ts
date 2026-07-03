@@ -9,7 +9,7 @@ export async function getBatches(productId?: string) {
     const supabase = await createClient();
     let query = supabase
       .from('batches')
-      .select('*, products(name, generic_name, unit, tax_rate), suppliers(name)')
+      .select('*, products(name, generic_name, unit, tax_rate, barcode), suppliers(name)')
       .order('expiry_date', { ascending: true });
 
     if (productId) {

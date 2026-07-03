@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { supplierSchema } from '@/lib/validation';
@@ -14,6 +15,8 @@ import {
   AlertTriangle,
   Loader2,
   CheckCircle,
+  Upload,
+  Download,
 } from 'lucide-react';
 
 import { z } from 'zod';
@@ -36,6 +39,7 @@ interface SupplierClientProps {
 type SupplierFormData = z.infer<typeof supplierSchema>;
 
 export default function SupplierClient({ initialSuppliers }: SupplierClientProps) {
+  const router = useRouter();
   const [suppliers, setSuppliers] = useState<Supplier[]>(initialSuppliers);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -44,13 +48,117 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
+  useEffect(() => {
+    setSuppliers(initialSuppliers);
+  }, [initialSuppliers]);
+
+  const exportSuppliersToCSV = () => {
+    const headers = ['Name', 'Contact Person', 'Phone', 'Email', 'GSTIN', 'Address'];
+    const rows = suppliers.map(s => [
+      `"${(s.name || '').replace(/"/g, '""')}"`,
+      `"${(s.contact_person || '').replace(/"/g, '""')}"`,
+      `"${(s.phone || '').replace(/"/g, '""')}"`,
+      `"${(s.email || '').replace(/"/g, '""')}"`,
+      `"${(s.gstin || '').replace(/"/g, '""')}"`,
+      `"${(s.address || '').replace(/"/g, '""')}"`
+    ]);
+
+    const csvContent = "\ufeff" + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'suppliers_registry.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target?.result as string;
+        const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+        if (lines.length <= 1) {
+          alert('CSV file is empty.');
+          return;
+        }
+
+        const parsedSuppliers: any[] = [];
+        for (let i = 1; i < lines.length; i++) {
+          const row = parseCSVRow(lines[i]);
+          if (row.length < 6) continue;
+
+          parsedSuppliers.push({
+            name: row[0],
+            contact_person: row[1] || null,
+            phone: row[2] || null,
+            email: row[3] || null,
+            gstin: row[4] || null,
+            address: row[5] || null
+          });
+        }
+
+        if (parsedSuppliers.length === 0) {
+          alert('No valid supplier rows detected.');
+          return;
+        }
+
+        let successCount = 0;
+        let failCount = 0;
+
+        startTransition(async () => {
+          for (const sup of parsedSuppliers) {
+            const res = await createSupplier(null, sup);
+            if (res?.error) {
+              failCount++;
+            } else {
+              successCount++;
+            }
+          }
+          alert(`CSV Import Finished!\nSuccessfully Added: ${successCount}\nFailed: ${failCount}`);
+          router.refresh();
+        });
+      } catch (err) {
+        alert('An error occurred parsing the CSV.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const parseCSVRow = (text: string): string[] => {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim().replace(/^["']|["']$/g, ''));
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim().replace(/^["']|["']$/g, ''));
+    return result;
+  };
+
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
   } = useForm<SupplierFormData>({
-    resolver: zodResolver(supplierSchema),
+    resolver: zodResolver(supplierSchema) as any,
     defaultValues: {
       name: '',
       contact_person: '',
@@ -108,10 +216,11 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
         setSuccessMsg(
           editingSupplier ? 'Supplier updated successfully' : 'Supplier created successfully'
         );
+        router.refresh();
         setTimeout(() => {
           setIsModalOpen(false);
-          window.location.reload();
-        }, 1200);
+          setSuccessMsg(null);
+        }, 1000);
       }
     });
   };
@@ -119,11 +228,15 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this supplier?')) return;
 
+    const previousSuppliers = suppliers;
+    setSuppliers((prev) => prev.filter((s) => s.id !== id));
+
     const res = await deleteSupplier(id);
     if (res?.error) {
       alert(res.error);
+      setSuppliers(previousSuppliers);
     } else {
-      window.location.reload();
+      router.refresh();
     }
   };
 
@@ -144,13 +257,37 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
           <h1 className="text-2xl font-bold tracking-tight text-white">Supplier Master</h1>
           <p className="text-sm text-slate-400">Manage medicine manufacturers, distributors, and logistics partners</p>
         </div>
-        <button
-          onClick={handleOpenAdd}
-          className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 px-4 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
-        >
-          <Plus className="h-4 w-4" />
-          Add Supplier
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Hidden Import file input */}
+          <input
+            type="file"
+            id="supplier-csv-upload"
+            accept=".csv"
+            onChange={handleImportCSV}
+            className="hidden"
+          />
+          <label
+            htmlFor="supplier-csv-upload"
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:text-white text-slate-300 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
+          >
+            <Upload className="h-4 w-4" />
+            Import CSV
+          </label>
+          <button
+            onClick={exportSuppliersToCSV}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:text-white text-slate-300 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
+          >
+            <Download className="h-4 w-4" />
+            Export CSV
+          </button>
+          <button
+            onClick={handleOpenAdd}
+            className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 px-4 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 cursor-pointer"
+          >
+            <Plus className="h-4 w-4" />
+            Add Supplier
+          </button>
+        </div>
       </div>
 
       {/* Search Bar */}

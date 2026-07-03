@@ -42,11 +42,11 @@ export default function Header({ profile }: HeaderProps) {
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/products', label: 'Products', icon: Pill },
     { href: '/admin/batches', label: 'Batches', icon: Layers },
+    { href: '/admin/sales', label: 'Bills', icon: FileText },
     { href: '/admin/employees', label: 'Employees', icon: Users },
     { href: '/admin/suppliers', label: 'Suppliers', icon: Truck },
-    { href: '/admin/purchase-orders', label: 'POs', icon: FileSpreadsheet },
     { href: '/admin/analytics', label: 'Analytics', icon: TrendingUp },
-    { href: '/admin/audit-logs', label: 'Audit Trail', icon: FileText },
+    { href: '/admin/audit-logs', label: 'Audit Trail', icon: Activity },
     { href: '/admin/settings', label: 'Settings', icon: Settings },
   ];
 

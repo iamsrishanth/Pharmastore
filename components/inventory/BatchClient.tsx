@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { batchSchema } from '@/lib/validation';
@@ -16,6 +17,8 @@ import {
   Loader2,
   CheckCircle,
   Calendar,
+  Upload,
+  Download,
 } from 'lucide-react';
 
 import { z } from 'zod';
@@ -25,6 +28,7 @@ interface Product {
   name: string;
   generic_name: string | null;
   unit: string | null;
+  barcode?: string | null;
 }
 
 interface Supplier {
@@ -49,6 +53,7 @@ interface Batch {
     generic_name: string | null;
     unit: string | null;
     tax_rate: number;
+    barcode?: string | null;
   } | null;
   suppliers: {
     name: string;
@@ -68,6 +73,7 @@ export default function BatchClient({
   products,
   suppliers,
 }: BatchClientProps) {
+  const router = useRouter();
   const [batches, setBatches] = useState<Batch[]>(initialBatches);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -75,6 +81,148 @@ export default function BatchClient({
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setBatches(initialBatches);
+  }, [initialBatches]);
+
+  const exportBatchesToCSV = () => {
+    const headers = [
+      'Product Barcode',
+      'Product Name',
+      'Supplier Name',
+      'Batch Number',
+      'Mfg Date (YYYY-MM-DD)',
+      'Expiry Date (YYYY-MM-DD)',
+      'Quantity Ingested',
+      'Purchase Price',
+      'MRP',
+      'Selling Price'
+    ];
+
+    const rows = batches.map(b => [
+      `"${(b.products?.barcode || '').replace(/"/g, '""')}"`,
+      `"${(b.products?.name || '').replace(/"/g, '""')}"`,
+      `"${(b.suppliers?.name || '').replace(/"/g, '""')}"`,
+      `"${(b.batch_number || '').replace(/"/g, '""')}"`,
+      `"${(b.mfg_date || '').replace(/"/g, '""')}"`,
+      `"${(b.expiry_date || '').replace(/"/g, '""')}"`,
+      b.quantity_received,
+      b.purchase_price,
+      b.mrp,
+      b.selling_price
+    ]);
+
+    const csvContent = "\ufeff" + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'batches_registry.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target?.result as string;
+        const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+        if (lines.length <= 1) {
+          alert('CSV file is empty.');
+          return;
+        }
+
+        const parsedBatches: any[] = [];
+        for (let i = 1; i < lines.length; i++) {
+          const row = parseCSVRow(lines[i]);
+          if (row.length < 10) continue;
+
+          const csvBarcode = row[0];
+          const csvProductName = row[1];
+          const csvSupplierName = row[2];
+
+          let matchedProduct = products.find(p => p.barcode === csvBarcode);
+          if (!matchedProduct && csvProductName) {
+            matchedProduct = products.find(p => p.name.toLowerCase() === csvProductName.toLowerCase());
+          }
+
+          if (!matchedProduct) {
+            console.warn(`Product not found for: ${csvProductName || csvBarcode}`);
+            continue;
+          }
+
+          let matchedSupplier = null;
+          if (csvSupplierName) {
+            matchedSupplier = suppliers.find(s => s.name.toLowerCase() === csvSupplierName.toLowerCase());
+          }
+
+          parsedBatches.push({
+            product_id: matchedProduct.id,
+            supplier_id: matchedSupplier ? matchedSupplier.id : null,
+            batch_number: row[3],
+            mfg_date: row[4] || null,
+            expiry_date: row[5],
+            quantity_received: Number(row[6] || '0'),
+            purchase_price: Number(row[7] || '0'),
+            mrp: Number(row[8] || '0'),
+            selling_price: Number(row[9] || '0'),
+          });
+        }
+
+        if (parsedBatches.length === 0) {
+          alert('No valid batches parsed. Verify names or barcodes exist in catalog.');
+          return;
+        }
+
+        let successCount = 0;
+        let failCount = 0;
+
+        startTransition(async () => {
+          for (const bData of parsedBatches) {
+            const res = await createBatch(null, bData);
+            if (res?.error) {
+              failCount++;
+            } else {
+              successCount++;
+            }
+          }
+          alert(`CSV Import Finished!\nSuccessfully Added: ${successCount}\nFailed: ${failCount}`);
+          router.refresh();
+        });
+      } catch (err) {
+        alert('CSV parsing failure.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const parseCSVRow = (text: string): string[] => {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim().replace(/^["']|["']$/g, ''));
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim().replace(/^["']|["']$/g, ''));
+    return result;
+  };
 
   const {
     register,
@@ -156,10 +304,11 @@ export default function BatchClient({
         setSuccessMsg(
           editingBatch ? 'Batch updated successfully' : 'Batch created & stock logged successfully'
         );
+        router.refresh();
         setTimeout(() => {
           setIsModalOpen(false);
-          window.location.reload();
-        }, 1200);
+          setSuccessMsg(null);
+        }, 1000);
       }
     });
   };
@@ -167,11 +316,15 @@ export default function BatchClient({
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this batch? This will revert any stock availability associated with it.')) return;
 
+    const previousBatches = batches;
+    setBatches((prev) => prev.filter((b) => b.id !== id));
+
     const res = await deleteBatch(id);
     if (res?.error) {
       alert(res.error);
+      setBatches(previousBatches);
     } else {
-      window.location.reload();
+      router.refresh();
     }
   };
 
@@ -191,13 +344,37 @@ export default function BatchClient({
           <h1 className="text-2xl font-bold tracking-tight text-white">Batch Master</h1>
           <p className="text-sm text-slate-400">Manage medicine batches, pricing, and expiry dates</p>
         </div>
-        <button
-          onClick={handleOpenAdd}
-          className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 px-4 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
-        >
-          <Plus className="h-4 w-4" />
-          Add Batch (Stock-In)
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Hidden Import file input */}
+          <input
+            type="file"
+            id="batch-csv-upload"
+            accept=".csv"
+            onChange={handleImportCSV}
+            className="hidden"
+          />
+          <label
+            htmlFor="batch-csv-upload"
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:text-white text-slate-300 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
+          >
+            <Upload className="h-4 w-4" />
+            Import CSV
+          </label>
+          <button
+            onClick={exportBatchesToCSV}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:text-white text-slate-300 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
+          >
+            <Download className="h-4 w-4" />
+            Export CSV
+          </button>
+          <button
+            onClick={handleOpenAdd}
+            className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 px-4 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 cursor-pointer"
+          >
+            <Plus className="h-4 w-4" />
+            Add Batch
+          </button>
+        </div>
       </div>
 
       {/* Search Bar */}

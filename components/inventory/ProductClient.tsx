@@ -15,6 +15,8 @@ import {
   AlertTriangle,
   Loader2,
   CheckCircle,
+  Upload,
+  Download,
 } from 'lucide-react';
 
 import { z } from 'zod';
@@ -55,6 +57,135 @@ export default function ProductClient({ initialProducts }: ProductClientProps) {
   useEffect(() => {
     setProducts(initialProducts);
   }, [initialProducts]);
+
+  const exportProductsToCSV = () => {
+    const headers = [
+      'Name',
+      'Generic Name',
+      'Manufacturer',
+      'Category',
+      'Composition',
+      'Strength',
+      'Pack Size',
+      'Unit',
+      'HSN Code',
+      'Barcode',
+      'Requires Rx (true/false)',
+      'Reorder Level',
+      'Tax Rate (%)'
+    ];
+    
+    const rows = products.map(p => [
+      `"${(p.name || '').replace(/"/g, '""')}"`,
+      `"${(p.generic_name || '').replace(/"/g, '""')}"`,
+      `"${(p.manufacturer || '').replace(/"/g, '""')}"`,
+      `"${(p.category || '').replace(/"/g, '""')}"`,
+      `"${(p.composition || '').replace(/"/g, '""')}"`,
+      `"${(p.strength || '').replace(/"/g, '""')}"`,
+      `"${(p.pack_size || '').replace(/"/g, '""')}"`,
+      `"${(p.unit || '').replace(/"/g, '""')}"`,
+      `"${(p.hsn_code || '').replace(/"/g, '""')}"`,
+      `"${(p.barcode || '').replace(/"/g, '""')}"`,
+      p.requires_prescription ? 'true' : 'false',
+      p.reorder_level,
+      p.tax_rate
+    ]);
+
+    const csvContent = "\ufeff" + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'products_catalog.csv');
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleImportCSV = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const text = event.target?.result as string;
+        const lines = text.split('\n').map(line => line.trim()).filter(Boolean);
+        if (lines.length <= 1) {
+          alert('The selected CSV file is empty.');
+          return;
+        }
+
+        const parsedProducts: any[] = [];
+        for (let i = 1; i < lines.length; i++) {
+          const row = parseCSVRow(lines[i]);
+          if (row.length < 13) continue;
+
+          parsedProducts.push({
+            name: row[0],
+            generic_name: row[1] || null,
+            manufacturer: row[2] || null,
+            category: row[3] || null,
+            composition: row[4] || null,
+            strength: row[5] || null,
+            pack_size: row[6] || null,
+            unit: row[7] || 'Tablets',
+            hsn_code: row[8] || null,
+            barcode: row[9] || null,
+            requires_prescription: row[10]?.toLowerCase() === 'true',
+            reorder_level: Number(row[11] || '10'),
+            tax_rate: Number(row[12] || '12'),
+          });
+        }
+
+        if (parsedProducts.length === 0) {
+          alert('No valid product rows detected.');
+          return;
+        }
+
+        let successCount = 0;
+        let failCount = 0;
+
+        startTransition(async () => {
+          for (const prod of parsedProducts) {
+            const res = await createProduct(null, prod);
+            if (res?.error) {
+              failCount++;
+            } else {
+              successCount++;
+            }
+          }
+          alert(`CSV Import Finished!\nSuccessfully Added: ${successCount}\nFailed: ${failCount}`);
+          router.refresh();
+        });
+      } catch (err) {
+        alert('An error occurred parsing the CSV file.');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
+  const parseCSVRow = (text: string): string[] => {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < text.length; i++) {
+      const char = text[i];
+      if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        result.push(current.trim().replace(/^["']|["']$/g, ''));
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    result.push(current.trim().replace(/^["']|["']$/g, ''));
+    return result;
+  };
 
   const {
     register,
@@ -154,13 +285,11 @@ export default function ProductClient({ initialProducts }: ProductClientProps) {
     if (!confirm('Are you sure you want to delete this product? All corresponding batches will be deleted!')) return;
 
     const previousProducts = products;
-    // Optimistic delete for absolute snappiness
     setProducts((prev) => prev.filter((p) => p.id !== id));
 
     const res = await deleteProduct(id);
     if (res?.error) {
       alert(res.error);
-      // Revert on error
       setProducts(previousProducts);
     } else {
       router.refresh();
@@ -184,13 +313,37 @@ export default function ProductClient({ initialProducts }: ProductClientProps) {
           <h1 className="text-2xl font-bold tracking-tight text-white">Product Master</h1>
           <p className="text-sm text-slate-400">Manage medicine inventory items and details</p>
         </div>
-        <button
-          onClick={handleOpenAdd}
-          className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 px-4 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
-        >
-          <Plus className="h-4 w-4" />
-          Add Product
-        </button>
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Hidden Import file input */}
+          <input
+            type="file"
+            id="product-csv-upload"
+            accept=".csv"
+            onChange={handleImportCSV}
+            className="hidden"
+          />
+          <label
+            htmlFor="product-csv-upload"
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:text-white text-slate-300 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
+          >
+            <Upload className="h-4 w-4" />
+            Import CSV
+          </label>
+          <button
+            onClick={exportProductsToCSV}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:text-white text-slate-300 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
+          >
+            <Download className="h-4 w-4" />
+            Export CSV
+          </button>
+          <button
+            onClick={handleOpenAdd}
+            className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 px-4 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 cursor-pointer"
+          >
+            <Plus className="h-4 w-4" />
+            Add Product
+          </button>
+        </div>
       </div>
 
       {/* Search Bar */}
