@@ -20,6 +20,8 @@ import {
   Menu,
   X,
   User,
+  TrendingUp,
+  FileText,
 } from 'lucide-react';
 
 interface HeaderProps {
@@ -43,6 +45,8 @@ export default function Header({ profile }: HeaderProps) {
     { href: '/admin/employees', label: 'Employees', icon: Users },
     { href: '/admin/suppliers', label: 'Suppliers', icon: Truck },
     { href: '/admin/purchase-orders', label: 'POs', icon: FileSpreadsheet },
+    { href: '/admin/analytics', label: 'Analytics', icon: TrendingUp },
+    { href: '/admin/audit-logs', label: 'Audit Trail', icon: FileText },
     { href: '/admin/settings', label: 'Settings', icon: Settings },
   ];
 
