@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { productSchema } from '@/lib/validation';
@@ -42,6 +43,7 @@ interface ProductClientProps {
 type ProductFormData = z.infer<typeof productSchema>;
 
 export default function ProductClient({ initialProducts }: ProductClientProps) {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -49,6 +51,10 @@ export default function ProductClient({ initialProducts }: ProductClientProps) {
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  useEffect(() => {
+    setProducts(initialProducts);
+  }, [initialProducts]);
 
   const {
     register,
@@ -135,12 +141,11 @@ export default function ProductClient({ initialProducts }: ProductClientProps) {
         setSuccessMsg(
           editingProduct ? 'Product updated successfully' : 'Product created successfully'
         );
-        // Optimistically update lists or wait for server revalidation.
-        // For simplicity and direct reactivity, we reload or update locally.
+        router.refresh();
         setTimeout(() => {
           setIsModalOpen(false);
-          window.location.reload();
-        }, 1200);
+          setSuccessMsg(null);
+        }, 1000);
       }
     });
   };
@@ -148,11 +153,17 @@ export default function ProductClient({ initialProducts }: ProductClientProps) {
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this product? All corresponding batches will be deleted!')) return;
 
+    const previousProducts = products;
+    // Optimistic delete for absolute snappiness
+    setProducts((prev) => prev.filter((p) => p.id !== id));
+
     const res = await deleteProduct(id);
     if (res?.error) {
       alert(res.error);
+      // Revert on error
+      setProducts(previousProducts);
     } else {
-      window.location.reload();
+      router.refresh();
     }
   };
 
