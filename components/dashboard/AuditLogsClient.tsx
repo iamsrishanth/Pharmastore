@@ -11,6 +11,8 @@ import {
   Trash,
   ChevronDown,
   ChevronUp,
+  Copy,
+  Check,
 } from 'lucide-react';
 
 interface AuditLog {
@@ -35,6 +37,14 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterAction, setFilterAction] = useState<string>('all');
   const [expandedRow, setExpandedRow] = useState<string | null>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+
+  const handleCopy = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(id);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
 
   const toggleRow = (id: string) => {
     setExpandedRow((prev) => (prev === id ? null : id));
@@ -182,7 +192,20 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
                         </td>
 
                         {/* Affected UUID */}
-                        <td className="p-4 font-mono text-slate-400">{log.row_id}</td>
+                        <td className="p-4 font-mono text-slate-400 flex items-center gap-1.5">
+                          <span>{log.row_id.substring(0, 8)}...</span>
+                          <button
+                            onClick={(e) => handleCopy(e, log.row_id)}
+                            className="rounded p-1 hover:bg-slate-800 text-slate-550 hover:text-white transition-colors"
+                            title="Copy full UUID"
+                          >
+                            {copiedId === log.row_id ? (
+                              <Check className="h-3 w-3 text-emerald-400" />
+                            ) : (
+                              <Copy className="h-3 w-3" />
+                            )}
+                          </button>
+                        </td>
 
                         {/* Action expand */}
                         <td className="p-4 text-right">

@@ -1,0 +1,34 @@
+{
+  "nodes": [
+    {
+      "id": "NextJS_PIMS",
+      "label": "Next.js PIMS Project",
+      "type": "concept",
+      "description": "Next.js Pharmacy Inventory Management & Point of Sale System.",
+      "properties": {
+        "source": "README.md"
+      }
+    },
+    {
+      "id": "NextJS_Agent_Rules",
+      "label": "Next.js 16 Agent Rules",
+      "type": "concept",
+      "description": "Rules for Next.js 16 breaking changes, async cookies, and proxy routing in node_modules/next/dist/docs/.",
+      "properties": {
+        "source": "AGENTS.md"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "source": "NextJS_PIMS",
+      "target": "NextJS_Agent_Rules",
+      "type": "relates_to",
+      "description": "PIMS code execution adheres to Next.js 16 agent compliance guides.",
+      "properties": {}
+    }
+  ],
+  "hyperedges": [],
+  "input_tokens": 512,
+  "output_tokens": 256
+}

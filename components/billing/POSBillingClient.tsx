@@ -69,16 +69,25 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
 
   // Auto-close search list when selecting
   const [showProductList, setShowProductList] = useState(false);
+  const [activeSuggestionIdx, setActiveSuggestionIdx] = useState(0);
+
+  // Auto-dismiss alert notifications
+  useEffect(() => {
+    if (successMsg) {
+      const timer = setTimeout(() => setSuccessMsg(null), 4000);
+      return () => clearTimeout(timer);
+    }
+  }, [successMsg]);
+
+  useEffect(() => {
+    if (error) {
+      const timer = setTimeout(() => setError(null), 4055); // slightly offset
+      return () => clearTimeout(timer);
+    }
+  }, [error]);
 
   // Calculated totals
   const subtotal = cart.reduce((sum, item) => {
-    // In our system, selling price details are resolved at FEFO checkout on server,
-    // but in POS UI, we show a preview assuming default/general estimates.
-    // Let's assume a general preview price of ₹100 for display, or we fetch MRP preview.
-    // To make it look extremely real and premium, let's assign a mock preview MRP
-    // (since MRP is stored on the batch, we can show ₹100 placeholder or look up product details).
-    // Let's assume a baseline base price of ₹100 per unit for cart preview calculations, 
-    // but clearly communicate that actual prices will be locked on batches via FEFO at checkout.
     return sum + item.quantity * 100;
   }, 0);
 
@@ -103,16 +112,13 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
 
       scannerRef.current.render(
         (decodedText) => {
-          // Successfully scanned a barcode!
           handleBarcodeScan(decodedText);
           setShowScanner(false);
           if (scannerRef.current) {
             scannerRef.current.clear();
           }
         },
-        (err) => {
-          // Silent scan errors
-        }
+        (err) => {}
       );
     }
 
@@ -128,10 +134,8 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
     if (foundProduct) {
       addToCart(foundProduct);
       setSuccessMsg(`Scanned: ${foundProduct.name}`);
-      setTimeout(() => setSuccessMsg(null), 2000);
     } else {
       setError(`No product registered with barcode: ${barcode}`);
-      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -177,7 +181,6 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
       const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`;
       const filePath = `prescriptions/${fileName}`;
 
-      // Upload file to Supabase storage bucket 'prescriptions'
       const { data, error: uploadError } = await supabase.storage
         .from('prescriptions')
         .upload(filePath, file);
@@ -336,8 +339,27 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
                   onChange={(e) => {
                     setSearchQuery(e.target.value);
                     setShowProductList(true);
+                    setActiveSuggestionIdx(0);
                   }}
                   onFocus={() => setShowProductList(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'ArrowDown') {
+                      e.preventDefault();
+                      setActiveSuggestionIdx((prev) => 
+                        Math.min(suggestions.length - 1, prev + 1)
+                      );
+                    } else if (e.key === 'ArrowUp') {
+                      e.preventDefault();
+                      setActiveSuggestionIdx((prev) => Math.max(0, prev - 1));
+                    } else if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (suggestions[activeSuggestionIdx]) {
+                        addToCart(suggestions[activeSuggestionIdx]);
+                      }
+                    } else if (e.key === 'Escape') {
+                      setShowProductList(false);
+                    }
+                  }}
                   className="block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-3 pl-10 pr-4 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
                 />
               </div>
@@ -356,11 +378,15 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
             {/* Autocomplete Suggestions Box */}
             {showProductList && suggestions.length > 0 && (
               <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-slate-800 bg-slate-900 shadow-2xl divide-y divide-slate-800/60">
-                {suggestions.map((p) => (
+                {suggestions.map((p, idx) => (
                   <button
                     key={p.id}
                     onClick={() => addToCart(p)}
-                    className="flex w-full items-center justify-between px-4 py-3 text-left text-sm hover:bg-slate-800 transition"
+                    className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm transition-colors ${
+                      idx === activeSuggestionIdx 
+                        ? 'bg-slate-800 text-white' 
+                        : 'hover:bg-slate-800/50 text-slate-300'
+                    }`}
                   >
                     <div>
                       <div className="font-semibold text-white">{p.name}</div>
