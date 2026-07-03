@@ -135,3 +135,54 @@ export async function rejectAdjustment(id: string) {
     return { error: error.message || 'An unexpected error occurred' };
   }
 }
+
+export async function returnBatchToSupplier(batchId: string, reason: string) {
+  try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      return { error: 'Unauthorized: Session not found' };
+    }
+
+    const supabase = await createClient();
+    
+    // Fetch batch available quantity first
+    const { data: batch, error: batchError } = await supabase
+      .from('batches')
+      .select('quantity_available, supplier_id')
+      .eq('id', batchId)
+      .single();
+
+    if (batchError || !batch) {
+      return { error: 'Batch not found' };
+    }
+
+    if (batch.quantity_available <= 0) {
+      return { error: 'No stock available to return in this batch' };
+    }
+
+    // Insert stock movement of type 'return' with negative quantity
+    // In our system, return movements log the stock exit.
+    const { error: movementError } = await supabase.from('stock_movements').insert([
+      {
+        batch_id: batchId,
+        movement_type: 'return',
+        quantity: -batch.quantity_available,
+        status: 'approved',
+        reason: reason,
+        created_by: currentUser.id,
+      },
+    ]);
+
+    if (movementError) {
+      return { error: movementError.message };
+    }
+
+    revalidatePath('/admin/batches');
+    revalidatePath('/employee/stock');
+    revalidatePath('/employee/alerts');
+    revalidatePath('/employee/dashboard');
+    return { success: true };
+  } catch (error: any) {
+    return { error: error.message || 'An unexpected error occurred' };
+  }
+}
