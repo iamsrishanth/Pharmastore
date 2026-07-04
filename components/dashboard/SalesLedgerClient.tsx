@@ -106,10 +106,10 @@ export default function SalesLedgerClient({ initialSales }: SalesLedgerClientPro
     .filter((s) => {
       // Search text filter
       const query = searchQuery.toLowerCase();
-      const invoiceNo = s.invoice_number.toLowerCase();
-      const custName = s.customers?.name.toLowerCase() || 'walk-in customer';
+      const invoiceNo = (s.invoice_number || '').toLowerCase();
+      const custName = s.customers?.name?.toLowerCase() || 'walk-in customer';
       const custPhone = s.customers?.phone || '';
-      const cashierName = s.profiles?.full_name.toLowerCase() || '';
+      const cashierName = s.profiles?.full_name?.toLowerCase() || '';
 
       const matchesSearch =
         invoiceNo.includes(query) ||
