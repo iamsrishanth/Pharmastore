@@ -1,126 +1,105 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  
+  --primary: #0d9488;
+  --primary-hover: #0f766e;
+  
+  --success: #059669;
+  --info: #2563eb;
+  --warning: #d97706;
+  --danger: #e11d48;
+  
+  --border: #e2e8f0;
+  --card-bg: #ffffff;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  
+  --color-success: var(--success);
+  --color-info: var(--info);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
+  
+  --color-border: var(--border);
+  --color-card-bg: var(--card-bg);
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-/* --- Konoha Scroll Desk Skeuomorphic Styles --- */
-
-.konoha-sky-bg {
-  background-image: linear-gradient(to bottom, rgba(59, 89, 152, 0.4), rgba(138, 180, 224, 0.4)), url('/konoha_twilight.jpg');
-  background-size: cover;
-  background-position: center bottom;
-  position: relative;
-}
-
-.konoha-portal-glow {
-  background: radial-gradient(circle, rgba(110, 198, 255, 0.4) 0%, rgba(33, 150, 243, 0.1) 50%, transparent 70%);
-  animation: pulse-glow 4s ease-in-out infinite;
-}
-
-@keyframes pulse-glow {
-  0%, 100% {
-    transform: scale(1) translate(-50%, -50%);
-    opacity: 0.6;
-  }
-  50% {
-    transform: scale(1.1) translate(-50%, -50%);
-    opacity: 0.9;
-  }
-}
-
-.wood-desk-bg {
-  background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.55)), url('/dark_wood.jpg');
-  background-size: 400px 400px;
-  background-repeat: repeat;
-  border-top: 6px double #8a6341;
-  box-shadow: inset 0 12px 24px rgba(0,0,0,0.7), 0 -8px 24px rgba(0,0,0,0.5);
-}
-
-.scroll-container-card {
-  background-image: linear-gradient(rgba(242, 232, 208, 0.92), rgba(242, 232, 208, 0.92)), url('/parchment.jpg');
-  background-size: 300px 300px;
-  background-repeat: repeat;
-  border-left: 3px solid #8a6341;
-  border-right: 3px solid #8a6341;
-  border-top: 1px solid #c4b08a;
-  border-bottom: 1px solid #c4b08a;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55), inset 0 0 15px rgba(138, 99, 65, 0.25);
-  position: relative;
-  border-radius: 4px;
-}
-
-.scroll-container-card::before {
-  content: '';
-  position: absolute;
-  top: -12px;
-  left: -2px;
-  right: -2px;
-  height: 12px;
-  background: linear-gradient(90deg, #3a2418 0%, #8a6341 5%, #dcc8a0 12%, #dcc8a0 88%, #8a6341 95%, #3a2418 100%);
-  border-bottom: 2px solid #5c3a21;
-  border-radius: 4px 4px 0 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-.scroll-container-card::after {
-  content: '';
-  position: absolute;
-  bottom: -12px;
-  left: -2px;
-  right: -2px;
-  height: 12px;
-  background: linear-gradient(90deg, #3a2418 0%, #8a6341 5%, #c8b488 12%, #c8b488 88%, #8a6341 95%, #3a2418 100%);
-  border-top: 2px solid #5c3a21;
-  border-radius: 0 0 4px 4px;
-  box-shadow: 0 -2px 4px rgba(0,0,0,0.3);
-}
-
-.scroll-heading {
-  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
-  color: #2c1e11;
-  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.7);
-  border-bottom: 2px dashed rgba(138, 99, 65, 0.4);
-}
-
-.scroll-text-serif {
-  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
-  color: #1a1a1a;
-}
-
-.scroll-label-sans {
   font-family: system-ui, -apple-system, sans-serif;
+  min-height: 100vh;
+}
+
+/* Custom visual utility classes for the Pharmacy Light Theme */
+
+.rx-card {
+  background-color: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.03), 0 2px 4px -2px rgba(0, 0, 0, 0.03);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rx-card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+  border-color: #cbd5e1;
+}
+
+.rx-banner {
+  background-image: linear-gradient(135deg, rgba(13, 148, 136, 0.08) 0%, rgba(255, 255, 255, 0.95) 80%), url('/clean_rx_banner.jpg');
+  background-size: cover;
+  background-position: center;
+  border: 1px solid var(--border);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+.rx-table-header {
+  background-color: #f1f5f9;
+  color: #475569;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #4a3c2c;
-  font-weight: 700;
-  font-size: 0.7rem;
+  font-size: 0.675rem;
+  letter-spacing: 0.05em;
 }
 
-.scroll-metric-bold {
-  font-family: "Impact", "Arial Black", sans-serif;
-  color: #2c1e11;
-  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+.rx-table-row {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease;
 }
 
+.rx-table-row:hover {
+  background-color: #f8fafc;
+}
+
+.rx-badge-success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.rx-badge-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.rx-badge-danger {
+  background-color: #ffe4e6;
+  color: #9f1239;
+  border: 1px solid #fecdd3;
+}
+
+.rx-badge-info {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
