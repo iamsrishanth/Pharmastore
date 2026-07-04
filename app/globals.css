@@ -24,3 +24,103 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* --- Konoha Scroll Desk Skeuomorphic Styles --- */
+
+.konoha-sky-bg {
+  background-image: linear-gradient(to bottom, rgba(59, 89, 152, 0.4), rgba(138, 180, 224, 0.4)), url('/konoha_twilight.jpg');
+  background-size: cover;
+  background-position: center bottom;
+  position: relative;
+}
+
+.konoha-portal-glow {
+  background: radial-gradient(circle, rgba(110, 198, 255, 0.4) 0%, rgba(33, 150, 243, 0.1) 50%, transparent 70%);
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    transform: scale(1) translate(-50%, -50%);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.1) translate(-50%, -50%);
+    opacity: 0.9;
+  }
+}
+
+.wood-desk-bg {
+  background-image: linear-gradient(rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0.55)), url('/dark_wood.jpg');
+  background-size: 400px 400px;
+  background-repeat: repeat;
+  border-top: 6px double #8a6341;
+  box-shadow: inset 0 12px 24px rgba(0,0,0,0.7), 0 -8px 24px rgba(0,0,0,0.5);
+}
+
+.scroll-container-card {
+  background-image: linear-gradient(rgba(242, 232, 208, 0.92), rgba(242, 232, 208, 0.92)), url('/parchment.jpg');
+  background-size: 300px 300px;
+  background-repeat: repeat;
+  border-left: 3px solid #8a6341;
+  border-right: 3px solid #8a6341;
+  border-top: 1px solid #c4b08a;
+  border-bottom: 1px solid #c4b08a;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.55), inset 0 0 15px rgba(138, 99, 65, 0.25);
+  position: relative;
+  border-radius: 4px;
+}
+
+.scroll-container-card::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: -2px;
+  right: -2px;
+  height: 12px;
+  background: linear-gradient(90deg, #3a2418 0%, #8a6341 5%, #dcc8a0 12%, #dcc8a0 88%, #8a6341 95%, #3a2418 100%);
+  border-bottom: 2px solid #5c3a21;
+  border-radius: 4px 4px 0 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+.scroll-container-card::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: -2px;
+  right: -2px;
+  height: 12px;
+  background: linear-gradient(90deg, #3a2418 0%, #8a6341 5%, #c8b488 12%, #c8b488 88%, #8a6341 95%, #3a2418 100%);
+  border-top: 2px solid #5c3a21;
+  border-radius: 0 0 4px 4px;
+  box-shadow: 0 -2px 4px rgba(0,0,0,0.3);
+}
+
+.scroll-heading {
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+  color: #2c1e11;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.7);
+  border-bottom: 2px dashed rgba(138, 99, 65, 0.4);
+}
+
+.scroll-text-serif {
+  font-family: Georgia, Cambria, "Times New Roman", Times, serif;
+  color: #1a1a1a;
+}
+
+.scroll-label-sans {
+  font-family: system-ui, -apple-system, sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #4a3c2c;
+  font-weight: 700;
+  font-size: 0.7rem;
+}
+
+.scroll-metric-bold {
+  font-family: "Impact", "Arial Black", sans-serif;
+  color: #2c1e11;
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.8);
+}
+

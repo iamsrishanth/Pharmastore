@@ -19,7 +19,7 @@ interface AuditLog {
   id: string;
   table_name: string;
   action: string;
-  row_id: string;
+  row_id: string | null;
   old_values: any;
   new_values: any;
   created_at: string;
@@ -55,7 +55,7 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
     const matchesSearch =
       log.table_name.toLowerCase().includes(query) ||
       log.action.toLowerCase().includes(query) ||
-      log.row_id.toLowerCase().includes(query) ||
+      (log.row_id || '').toLowerCase().includes(query) ||
       (log.profiles?.full_name && log.profiles.full_name.toLowerCase().includes(query));
 
     const matchesAction = filterAction === 'all' || log.action === filterAction;
@@ -193,18 +193,20 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
 
                         {/* Affected UUID */}
                         <td className="p-4 font-mono text-slate-400 flex items-center gap-1.5">
-                          <span>{log.row_id.substring(0, 8)}...</span>
-                          <button
-                            onClick={(e) => handleCopy(e, log.row_id)}
-                            className="rounded p-1 hover:bg-slate-800 text-slate-550 hover:text-white transition-colors"
-                            title="Copy full UUID"
-                          >
-                            {copiedId === log.row_id ? (
-                              <Check className="h-3 w-3 text-emerald-400" />
-                            ) : (
-                              <Copy className="h-3 w-3" />
-                            )}
-                          </button>
+                          <span>{log.row_id ? `${log.row_id.substring(0, 8)}...` : 'N/A'}</span>
+                          {log.row_id && (
+                            <button
+                              onClick={(e) => handleCopy(e, log.row_id || '')}
+                              className="rounded p-1 hover:bg-slate-800 text-slate-550 hover:text-white transition-colors"
+                              title="Copy full UUID"
+                            >
+                              {copiedId === log.row_id ? (
+                                <Check className="h-3 w-3 text-emerald-400" />
+                              ) : (
+                                <Copy className="h-3 w-3" />
+                              )}
+                            </button>
+                          )}
                         </td>
 
                         {/* Action expand */}
