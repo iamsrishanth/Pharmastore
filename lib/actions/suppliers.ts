@@ -1,12 +1,12 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createPublicClient } from '@/lib/supabase/server';
 import { supplierSchema } from '@/lib/validation';
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
 
 async function fetchSuppliersFromDb() {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from('suppliers')
       .select('*')

@@ -1,12 +1,12 @@
 'use server';
 
-import { createAdminClient, createClient } from '@/lib/supabase/server';
+import { createAdminClient, createClient, createPublicClient } from '@/lib/supabase/server';
 import { employeeSchema } from '@/lib/validation';
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
 
 async function fetchEmployeesFromDb() {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data, error } = await supabase
       .from('profiles')
       .select('*')

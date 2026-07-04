@@ -1,12 +1,12 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createClient, createPublicClient } from '@/lib/supabase/server';
 import { productSchema } from '@/lib/validation';
 import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
 
 async function fetchProductsFromDb(searchQuery?: string) {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     let query = supabase.from('products').select('*').order('name', { ascending: true });
 
     if (searchQuery) {
