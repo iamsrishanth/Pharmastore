@@ -304,20 +304,20 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
       <div className="print:hidden grid grid-cols-1 gap-6 lg:grid-cols-3">
         {/* Left Side: Product Search & Cart */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 backdrop-blur-md">
-            <h2 className="text-lg font-bold text-white flex items-center gap-2 mb-4">
-              <ShoppingCart className="h-5 w-5 text-emerald-400" />
+          <div className="rx-card p-6">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-4">
+              <ShoppingCart className="h-5 w-5 text-teal-650" />
               Counter Billing Terminal
             </h2>
 
             {/* Barcode scanner view */}
             {showScanner && (
-              <div className="mb-4 overflow-hidden rounded-xl border border-slate-800 bg-slate-950 p-4">
+              <div className="mb-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-50 p-4">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-semibold text-slate-400">Position barcode in the box</span>
+                  <span className="text-xs font-semibold text-slate-500">Position barcode in the box</span>
                   <button
                     onClick={() => setShowScanner(false)}
-                    className="text-xs text-red-400 hover:underline"
+                    className="text-xs text-rose-600 hover:underline"
                   >
                     Close Camera
                   </button>
@@ -329,7 +329,7 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
             {/* Product Lookup Area */}
             <div className="relative flex gap-2">
               <div className="relative flex-1">
-                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
                   <Search className="h-4 w-4" />
                 </div>
                 <input
@@ -360,42 +360,42 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
                       setShowProductList(false);
                     }
                   }}
-                  className="block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-3 pl-10 pr-4 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                  className="block w-full rounded-xl border border-slate-350 bg-white py-3 pl-10 pr-4 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
                 />
               </div>
 
               {/* Camera Scanner Toggle */}
               <button
                 onClick={() => setShowScanner(!showScanner)}
-                className="flex items-center justify-center rounded-xl bg-slate-800 hover:bg-slate-700 px-4 border border-slate-700 text-slate-300 gap-1.5 transition"
+                className="flex items-center justify-center rounded-xl bg-slate-50 hover:bg-slate-100 px-4 border border-slate-300 text-slate-700 gap-1.5 transition cursor-pointer"
                 title="Scan Barcode using Device Camera"
               >
-                <Camera className="h-5 w-5 text-emerald-400" />
+                <Camera className="h-5 w-5 text-teal-650" />
                 <span className="hidden sm:inline text-xs font-semibold">Camera Scan</span>
               </button>
             </div>
 
             {/* Autocomplete Suggestions Box */}
             {showProductList && suggestions.length > 0 && (
-              <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-slate-800 bg-slate-900 shadow-2xl divide-y divide-slate-800/60">
+              <div className="absolute z-20 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-2xl divide-y divide-slate-100">
                 {suggestions.map((p, idx) => (
                   <button
                     key={p.id}
                     onClick={() => addToCart(p)}
                     className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm transition-colors ${
                       idx === activeSuggestionIdx 
-                        ? 'bg-slate-800 text-white' 
-                        : 'hover:bg-slate-800/50 text-slate-300'
+                        ? 'bg-teal-50 text-teal-900' 
+                        : 'hover:bg-slate-50 text-slate-750'
                     }`}
                   >
                     <div>
-                      <div className="font-semibold text-white">{p.name}</div>
-                      <div className="text-xs text-slate-400">{p.generic_name || 'Composition N/A'}</div>
+                      <div className="font-semibold text-slate-800">{p.name}</div>
+                      <div className="text-xs text-slate-500">{p.generic_name || 'Composition N/A'}</div>
                     </div>
                     <div className="text-right">
-                      <span className="rounded bg-slate-800 px-2 py-0.5 text-xs text-slate-300">GST: {p.tax_rate}%</span>
+                      <span className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600 border border-slate-200">GST: {p.tax_rate}%</span>
                       {p.requires_prescription && (
-                        <span className="ml-1.5 rounded bg-red-500/10 border border-red-500/20 px-2 py-0.5 text-xs text-red-400">Rx</span>
+                        <span className="ml-1.5 rounded bg-rose-50 border border-rose-200 px-2 py-0.5 text-xs text-rose-700">Rx</span>
                       )}
                     </div>
                   </button>
@@ -405,11 +405,11 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
 
             {/* Cart Table */}
             <div className="mt-6">
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-3">Billing Cart</h3>
-              <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/20">
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">Billing Cart</h3>
+              <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-slate-800 bg-slate-900/50 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                    <tr className="rx-table-header border-b border-slate-200 text-[10px] font-bold uppercase tracking-wider text-slate-500">
                       <th className="p-3">Medicine Description</th>
                       <th className="p-3 text-center">Tax Split</th>
                       <th className="p-3 text-center">Quantity</th>
@@ -417,58 +417,58 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
                       <th className="p-3 text-right">Remove</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-800/50 text-xs">
+                  <tbody className="divide-y divide-slate-100 text-xs text-slate-650">
                     {cart.length === 0 ? (
                       <tr>
-                        <td colSpan={5} className="p-8 text-center text-slate-500">
+                        <td colSpan={5} className="p-8 text-center text-slate-400">
                           Your billing cart is empty. Scan or search items above to begin.
                         </td>
                       </tr>
                     ) : (
                       cart.map((item) => (
-                        <tr key={item.product.id} className="hover:bg-slate-800/10 transition">
+                        <tr key={item.product.id} className="rx-table-row">
                           <td className="p-3">
-                            <div className="font-bold text-white">{item.product.name}</div>
-                            <div className="text-[10px] text-slate-400">
+                            <div className="font-semibold text-slate-900">{item.product.name}</div>
+                            <div className="text-[10px] text-slate-500">
                               {item.product.generic_name || 'Generic'} {item.product.requires_prescription && (
-                                <span className="ml-1 text-red-400 font-semibold">[Prescription Req.]</span>
+                                <span className="ml-1 text-rose-600 font-semibold">[Prescription Req.]</span>
                               )}
                             </div>
                           </td>
                           <td className="p-3 text-center">
-                            <span className="text-[10px] text-slate-400">
+                            <span className="text-[10px] text-slate-500">
                               CGST: {item.taxRate / 2}% / SGST: {item.taxRate / 2}%
                             </span>
                           </td>
                           <td className="p-3 text-center">
-                            <div className="inline-flex items-center rounded-lg bg-slate-800 p-0.5 border border-slate-700">
+                            <div className="inline-flex items-center rounded-lg bg-slate-55 p-0.5 border border-slate-200">
                               <button
                                 type="button"
                                 onClick={() => updateQuantity(item.product.id, -1)}
-                                className="rounded p-1 text-slate-400 hover:text-white"
+                                className="rounded p-1 text-slate-500 hover:bg-slate-200 hover:text-slate-900 cursor-pointer"
                               >
                                 <Minus className="h-3 w-3" />
                               </button>
-                              <span className="w-8 font-bold text-white text-center text-xs">
+                              <span className="w-8 font-bold text-slate-800 text-center text-xs">
                                 {item.quantity}
                               </span>
                               <button
                                 type="button"
                                 onClick={() => updateQuantity(item.product.id, 1)}
-                                className="rounded p-1 text-slate-400 hover:text-white"
+                                className="rounded p-1 text-slate-500 hover:bg-slate-200 hover:text-slate-900 cursor-pointer"
                               >
                                 <Plus className="h-3 w-3" />
                               </button>
                             </div>
                           </td>
-                          <td className="p-3 text-right text-slate-200 font-mono">
+                          <td className="p-3 text-right text-slate-700 font-mono font-bold">
                             ₹{(item.quantity * 100).toFixed(2)}
                           </td>
                           <td className="p-3 text-right">
                             <button
                               type="button"
                               onClick={() => updateQuantity(item.product.id, -item.quantity)}
-                              className="rounded p-1.5 text-slate-500 hover:text-red-400 transition"
+                              className="rounded p-1.5 text-slate-400 hover:bg-rose-50 hover:text-rose-600 transition cursor-pointer"
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
@@ -485,65 +485,65 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
 
         {/* Right Side: Customer info, prescription upload & Checkout */}
         <div className="space-y-6">
-          <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 backdrop-blur-md space-y-6">
-            <h2 className="text-lg font-bold text-white border-b border-slate-800 pb-3">Checkout Details</h2>
+          <div className="rx-card p-6 space-y-6">
+            <h2 className="text-lg font-bold text-slate-900 border-b border-slate-200 pb-3">Checkout Details</h2>
 
             {/* Customer Details Form */}
             <div className="space-y-4">
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Customer Details</h3>
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Customer Details</h3>
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase">Mobile Number</label>
+                <label className="block text-[10px] font-bold text-slate-650 uppercase">Mobile Number</label>
                 <input
                   type="text"
                   placeholder="e.g. +91 98765 43210"
                   value={customerPhone}
                   onChange={(e) => setCustomerPhone(e.target.value)}
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2 px-3 text-xs text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2 px-3 text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase">Customer Name</label>
+                <label className="block text-[10px] font-bold text-slate-650 uppercase">Customer Name</label>
                 <input
                   type="text"
                   placeholder="e.g. Anand Kumar"
                   value={customerName}
                   onChange={(e) => setCustomerName(e.target.value)}
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2 px-3 text-xs text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2 px-3 text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
               </div>
               <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase">Billing Address</label>
+                <label className="block text-[10px] font-bold text-slate-650 uppercase">Billing Address</label>
                 <input
                   type="text"
                   placeholder="City, Pin Code"
                   value={customerAddress}
                   onChange={(e) => setCustomerAddress(e.target.value)}
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2 px-3 text-xs text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2 px-3 text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
               </div>
             </div>
 
             {/* Prescription Mandatory Gate */}
             {requiresRx && (
-              <div className="space-y-4 rounded-xl border border-red-500/10 bg-red-500/5 p-4">
-                <div className="flex gap-2 text-xs font-semibold text-red-400">
+              <div className="space-y-4 rounded-xl border border-rose-200 bg-rose-50 p-4">
+                <div className="flex gap-2 text-xs font-semibold text-rose-700">
                   <AlertCircle className="h-5 w-5 shrink-0" />
                   <span>Prescription Gate (Schedule H/H1/X)</span>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Prescription Ref / No *</label>
+                  <label className="block text-[10px] font-bold text-slate-650 uppercase">Prescription Ref / No *</label>
                   <input
                     type="text"
                     required
                     placeholder="Doctor Reg / Slip Ref"
                     value={prescriptionRef}
                     onChange={(e) => setPrescriptionRef(e.target.value)}
-                    className="mt-1 block w-full rounded-xl border border-slate-850 bg-slate-950/50 py-2 px-3 text-xs text-white placeholder-slate-500 outline-none focus:border-red-500"
+                    className="mt-1 block w-full rounded-xl border border-rose-250 bg-white py-2 px-3 text-xs text-slate-850 placeholder-slate-400 outline-none focus:border-rose-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase">Upload Prescription Image *</label>
-                  <div className="relative mt-1 flex items-center justify-center rounded-xl border border-dashed border-slate-800 bg-slate-950/50 py-4 px-3 text-slate-400 hover:border-slate-700 transition">
+                  <label className="block text-[10px] font-bold text-slate-650 uppercase">Upload Prescription Image *</label>
+                  <div className="relative mt-1 flex items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white py-4 px-3 text-slate-500 hover:border-slate-400 transition">
                     <input
                       type="file"
                       accept="image/*"
@@ -559,7 +559,7 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
                     </div>
                   </div>
                   {prescriptionUrl && (
-                    <div className="mt-2 flex items-center gap-1.5 text-[10px] text-emerald-400 font-semibold">
+                    <div className="mt-2 flex items-center gap-1.5 text-[10px] text-emerald-700 font-semibold">
                       <CheckCircle className="h-4 w-4" />
                       Uploaded successfully! <a href={prescriptionUrl} target="_blank" rel="noreferrer" className="underline">View public link</a>
                     </div>
@@ -569,44 +569,44 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
             )}
 
             {/* Financial Summary */}
-            <div className="space-y-3 border-t border-slate-800 pt-4 text-xs">
-              <div className="flex justify-between text-slate-400">
+            <div className="space-y-3 border-t border-slate-200 pt-4 text-xs">
+              <div className="flex justify-between text-slate-500">
                 <span>Subtotal (estimated):</span>
-                <span className="font-mono text-slate-200">₹{subtotal.toFixed(2)}</span>
+                <span className="font-mono text-slate-700">₹{subtotal.toFixed(2)}</span>
               </div>
-              <div className="flex justify-between text-slate-400">
+              <div className="flex justify-between text-slate-500">
                 <span>CGST / SGST split:</span>
-                <span className="font-mono text-slate-200">₹{taxAmount.toFixed(2)}</span>
+                <span className="font-mono text-slate-700">₹{taxAmount.toFixed(2)}</span>
               </div>
 
-              <div>
-                <label className="block text-[10px] font-bold text-slate-400 uppercase">Discount (₹)</label>
+              <div className="flex items-center justify-between">
+                <label className="text-[10px] font-bold text-slate-650 uppercase">Discount (₹)</label>
                 <input
                   type="number"
                   min={0}
                   value={discount}
                   onChange={(e) => setDiscount(Math.max(0, Number(e.target.value)))}
-                  className="mt-1 block w-24 rounded-xl border border-slate-800 bg-slate-950/50 py-1.5 px-3 text-xs text-white outline-none focus:border-emerald-500"
+                  className="block w-24 rounded-xl border border-slate-300 bg-white py-1.5 px-3 text-xs text-slate-800 outline-none focus:border-teal-500"
                 />
               </div>
 
-              <div className="flex justify-between text-sm font-bold text-white border-t border-slate-850 pt-3">
+              <div className="flex justify-between text-sm font-bold text-slate-900 border-t border-slate-100 pt-3">
                 <span>Net Total:</span>
-                <span className="font-mono text-emerald-400">₹{totalAmount.toFixed(2)}</span>
+                <span className="font-mono text-teal-650">₹{totalAmount.toFixed(2)}</span>
               </div>
             </div>
 
             {/* Payment Mode */}
             <div className="space-y-3">
-              <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Payment Mode</h3>
+              <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Payment Mode</h3>
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => setPaymentMode('cash')}
-                  className={`flex flex-col items-center justify-center rounded-xl p-3 border transition ${
+                  className={`flex flex-col items-center justify-center rounded-xl p-3 border transition cursor-pointer ${
                     paymentMode === 'cash'
-                      ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400'
-                      : 'border-slate-800 bg-slate-950/40 text-slate-400 hover:border-slate-700'
+                      ? 'bg-teal-50 border-teal-500 text-teal-700'
+                      : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
                   }`}
                 >
                   <DollarSign className="h-5 w-5 mb-1" />
@@ -616,10 +616,10 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
                 <button
                   type="button"
                   onClick={() => setPaymentMode('upi')}
-                  className={`flex flex-col items-center justify-center rounded-xl p-3 border transition ${
+                  className={`flex flex-col items-center justify-center rounded-xl p-3 border transition cursor-pointer ${
                     paymentMode === 'upi'
-                      ? 'bg-purple-500/10 border-purple-500 text-purple-400'
-                      : 'border-slate-800 bg-slate-950/40 text-slate-400 hover:border-slate-700'
+                      ? 'bg-teal-50 border-teal-500 text-teal-700'
+                      : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
                   }`}
                 >
                   <QrCode className="h-5 w-5 mb-1" />
@@ -629,10 +629,10 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
                 <button
                   type="button"
                   onClick={() => setPaymentMode('card')}
-                  className={`flex flex-col items-center justify-center rounded-xl p-3 border transition ${
+                  className={`flex flex-col items-center justify-center rounded-xl p-3 border transition cursor-pointer ${
                     paymentMode === 'card'
-                      ? 'bg-blue-500/10 border-blue-500 text-blue-400'
-                      : 'border-slate-800 bg-slate-950/40 text-slate-400 hover:border-slate-700'
+                      ? 'bg-teal-50 border-teal-500 text-teal-700'
+                      : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'
                   }`}
                 >
                   <CreditCard className="h-5 w-5 mb-1" />
@@ -643,14 +643,14 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
 
             {/* Error alerts */}
             {error && (
-              <div className="flex items-start gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-xs text-red-400">
+              <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-700">
                 <AlertCircle className="h-5 w-5 shrink-0 mt-0.5" />
                 <span>{error}</span>
               </div>
             )}
 
             {successMsg && (
-              <div className="flex items-start gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-xs text-emerald-400">
+              <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-700">
                 <CheckCircle className="h-5 w-5 shrink-0 mt-0.5" />
                 <div>
                   <div>{successMsg}</div>
@@ -662,12 +662,12 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
             )}
 
             {/* Print & Action Buttons */}
-            <div className="space-y-2 border-t border-slate-800 pt-4">
+            <div className="space-y-2 border-t border-slate-200 pt-4">
               <button
                 type="button"
                 disabled={isPending || cart.length === 0}
                 onClick={handleCheckout}
-                className="flex w-full items-center justify-center rounded-xl bg-emerald-500 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/15 hover:bg-emerald-400 disabled:opacity-50 transition"
+                className="flex w-full items-center justify-center rounded-xl bg-teal-600 hover:bg-teal-700 py-3 text-sm font-semibold text-white shadow-md disabled:opacity-50 transition cursor-pointer"
               >
                 {isPending ? (
                   <>
@@ -683,9 +683,9 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
                 <button
                   type="button"
                   onClick={handlePrint}
-                  className="flex w-full items-center justify-center rounded-xl bg-slate-800 border border-slate-700 hover:bg-slate-700 py-2.5 text-xs font-semibold text-slate-200 gap-1.5 transition"
+                  className="flex w-full items-center justify-center rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200 py-2.5 text-xs font-semibold text-slate-700 gap-1.5 transition cursor-pointer"
                 >
-                  <Printer className="h-4 w-4 text-emerald-400" />
+                  <Printer className="h-4 w-4 text-teal-650" />
                   Print Thermal Invoice (Ctrl+P)
                 </button>
               )}
