@@ -136,8 +136,8 @@ export default function EmployeeStockClient({ batches }: EmployeeStockClientProp
       {/* Header Panel */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Live Stock Register</h1>
-          <p className="text-sm text-slate-400">View available quantities, check expiry dates, and report damage or count corrections</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Live Stock Register</h1>
+          <p className="text-sm text-slate-550">View available quantities, check expiry dates, and report damage or count corrections</p>
         </div>
       </div>
 
@@ -151,19 +151,19 @@ export default function EmployeeStockClient({ batches }: EmployeeStockClientProp
           placeholder="Scan barcode or search name/generic/batch..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2.5 pl-9 pr-4 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+          className="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-9 pr-4 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
         />
         <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-          <Barcode className="h-5 w-5 text-slate-500" />
+          <Barcode className="h-5 w-5 text-slate-450" />
         </div>
       </div>
 
       {/* Table Container */}
-      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
+      <div className="overflow-hidden border border-slate-200 bg-white rounded-2xl shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-900/80 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <tr className="rx-table-header">
                 <th className="p-4">Product details</th>
                 <th className="p-4">Batch Code</th>
                 <th className="p-4 text-center">Expiry band</th>
@@ -173,7 +173,7 @@ export default function EmployeeStockClient({ batches }: EmployeeStockClientProp
                 <th className="p-4 text-right">Ledger Adjust</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-sm">
+            <tbody className="divide-y divide-slate-200 text-sm">
               {filteredBatches.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-8 text-center text-slate-500">
@@ -183,22 +183,29 @@ export default function EmployeeStockClient({ batches }: EmployeeStockClientProp
               ) : (
                 filteredBatches.map((batch) => {
                   const expiryInfo = getExpiryStatus(batch.expiry_date);
+                  const badgeClass =
+                    expiryInfo.status === 'expired' || expiryInfo.status === 'critical'
+                      ? 'rx-badge-danger'
+                      : expiryInfo.status === 'warning'
+                      ? 'rx-badge-warning'
+                      : 'rx-badge-success';
+
                   return (
-                    <tr key={batch.id} className="hover:bg-slate-800/20 transition duration-150">
+                    <tr key={batch.id} className="rx-table-row">
                       <td className="p-4">
-                        <div className="font-semibold text-white">
+                        <div className="font-semibold text-slate-900">
                           {batch.products?.name || 'Unknown Product'}
                         </div>
-                        <div className="text-xs text-slate-400">
+                        <div className="text-xs text-slate-550">
                           {batch.products?.generic_name || 'No generic'} {batch.products?.requires_prescription && (
-                            <span className="ml-1.5 inline-flex rounded-md bg-red-500/10 px-1.5 py-0.2 text-[9px] font-medium text-red-400">Rx</span>
+                            <span className="ml-1.5 inline-flex rounded-md px-1.5 py-0.2 text-[9px] font-semibold rx-badge-danger">Rx</span>
                           )}
                         </div>
                       </td>
-                      <td className="p-4 font-mono text-slate-200">{batch.batch_number}</td>
+                      <td className="p-4 font-mono text-slate-800">{batch.batch_number}</td>
                       <td className="p-4 text-center">
                         <span
-                          className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold border ${expiryInfo.bgClass} ${expiryInfo.borderClass} ${expiryInfo.colorClass}`}
+                          className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold border ${badgeClass}`}
                         >
                           {expiryInfo.label}
                         </span>
@@ -207,20 +214,20 @@ export default function EmployeeStockClient({ batches }: EmployeeStockClientProp
                         </div>
                       </td>
                       <td className="p-4 text-center">
-                        <span className={`font-semibold ${batch.quantity_available === 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+                        <span className={`font-semibold ${batch.quantity_available === 0 ? 'text-rose-600' : 'text-emerald-700'}`}>
                           {batch.quantity_available}
                         </span>
                         <span className="text-xs text-slate-500"> / {batch.quantity_received}</span>
-                        <div className="text-[10px] text-slate-400 uppercase mt-0.5">{batch.products?.unit || 'units'}</div>
+                        <div className="text-[10px] text-slate-550 uppercase mt-0.5">{batch.products?.unit || 'units'}</div>
                       </td>
-                      <td className="p-4 text-center text-slate-200 font-mono text-xs">
+                      <td className="p-4 text-center text-slate-700 font-mono text-xs">
                         ₹{Number(batch.mrp).toFixed(2)}
                       </td>
-                      <td className="p-4 text-slate-300">{batch.suppliers?.name || 'Direct / Unknown'}</td>
+                      <td className="p-4 text-slate-700">{batch.suppliers?.name || 'Direct / Unknown'}</td>
                       <td className="p-4 text-right">
                         <button
                           onClick={() => handleOpenAdjustment(batch)}
-                          className="rounded-lg bg-slate-800/80 border border-slate-700 py-1.5 px-3 text-xs font-semibold text-amber-400 hover:bg-slate-800 hover:text-amber-300 transition"
+                          className="rounded-lg bg-amber-50 border border-amber-200 py-1.5 px-3 text-xs font-semibold text-amber-700 hover:bg-amber-100 transition shadow-sm"
                         >
                           Report Log
                         </button>
@@ -241,45 +248,45 @@ export default function EmployeeStockClient({ batches }: EmployeeStockClientProp
           onClose={() => !isPending && setIsModalOpen(false)}
           title="Report Discrepancy or Write-off"
         >
-          <div className="mb-4 rounded-xl bg-slate-950/40 p-4 border border-slate-800 text-sm">
-            <div className="text-xs font-semibold uppercase tracking-wider text-slate-400">Selected Medicine</div>
-            <div className="mt-1 font-bold text-white">{selectedBatch.products?.name}</div>
-            <div className="text-xs text-slate-400">Batch Code: <span className="font-mono text-slate-200">{selectedBatch.batch_number}</span></div>
-            <div className="mt-2 text-xs text-slate-400">Current Available Quantity: <span className="font-bold text-emerald-400">{selectedBatch.quantity_available} {selectedBatch.products?.unit || 'units'}</span></div>
+          <div className="mb-4 rounded-xl bg-slate-50 p-4 border border-slate-200 text-sm">
+            <div className="text-xs font-semibold uppercase tracking-wider text-slate-500">Selected Medicine</div>
+            <div className="mt-1 font-bold text-slate-900">{selectedBatch.products?.name}</div>
+            <div className="text-xs text-slate-500">Batch Code: <span className="font-mono text-slate-800">{selectedBatch.batch_number}</span></div>
+            <div className="mt-2 text-xs text-slate-550">Current Available Quantity: <span className="font-bold text-emerald-700">{selectedBatch.quantity_available} {selectedBatch.products?.unit || 'units'}</span></div>
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Action Type *
                 </label>
                 <select
                   {...register('adjustment_direction')}
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white outline-none focus:border-emerald-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
                 >
-                  <option value="decrease">Deduct / Decrease (-)</option>
-                  <option value="increase">Reconcile / Increase (+)</option>
+                  <option value="decrease" className="text-slate-850">Deduct / Decrease (-)</option>
+                  <option value="increase" className="text-slate-850">Reconcile / Increase (+)</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Adjustment Category *
                 </label>
                 <select
                   {...register('movement_type')}
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white outline-none focus:border-emerald-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
                 >
-                  <option value="writeoff">Write-off / Breakage / Theft</option>
-                  <option value="adjustment">Stock Count Adjustment</option>
+                  <option value="writeoff" className="text-slate-850">Write-off / Breakage / Theft</option>
+                  <option value="adjustment" className="text-slate-850">Stock Count Adjustment</option>
                 </select>
               </div>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Quantity *
                 </label>
                 <input
@@ -287,12 +294,12 @@ export default function EmployeeStockClient({ batches }: EmployeeStockClientProp
                   required
                   min={1}
                   {...register('quantity_input', { valueAsNumber: true })}
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white outline-none focus:border-emerald-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Reason for Adjustment *
                 </label>
                 <textarea
@@ -300,13 +307,13 @@ export default function EmployeeStockClient({ batches }: EmployeeStockClientProp
                   rows={3}
                   {...register('reason')}
                   placeholder="e.g. Expired capsules found, bottle broken, recount during monthly check..."
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 resize-none"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 resize-none"
                 />
               </div>
             </div>
 
             {/* Note alert */}
-            <div className="flex gap-2 rounded-xl bg-amber-500/5 border border-amber-500/20 p-3 text-xs text-amber-300">
+            <div className="flex gap-2 rounded-xl bg-amber-50 border border-amber-200 p-3 text-xs text-amber-800">
               <ShieldAlert className="h-5 w-5 shrink-0" />
               <span>
                 Note: Since your account has Operator / Employee permissions, this request will be sent to the Admin queue. It will not alter physical stock levels until approved by an administrator.
@@ -315,32 +322,32 @@ export default function EmployeeStockClient({ batches }: EmployeeStockClientProp
 
             {/* Feedback alerts */}
             {error && (
-              <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
+              <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
                 <AlertTriangle className="h-5 w-5 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
             {successMsg && (
-              <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-400">
+              <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
                 <CheckCircle className="h-5 w-5 shrink-0" />
                 <span>{successMsg}</span>
               </div>
             )}
 
-            <div className="flex justify-end gap-3 border-t border-slate-800 pt-4">
+            <div className="flex justify-end gap-3 border-t border-slate-200 pt-4">
               <button
                 type="button"
                 disabled={isPending}
                 onClick={() => setIsModalOpen(false)}
-                className="rounded-xl border border-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition"
+                className="rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 px-4 py-2.5 text-sm font-semibold transition"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isPending}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg transition hover:bg-amber-400 disabled:opacity-50"
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-semibold shadow-sm transition disabled:opacity-50 px-4 py-2.5 text-sm"
               >
                 {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                 Submit Request

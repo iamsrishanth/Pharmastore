@@ -341,8 +341,8 @@ export default function BatchClient({
       {/* Header Panel */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Batch Master</h1>
-          <p className="text-sm text-slate-400">Manage medicine batches, pricing, and expiry dates</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Batch Master</h1>
+          <p className="text-sm text-slate-550">Manage medicine batches, pricing, and expiry dates</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {/* Hidden Import file input */}
@@ -355,21 +355,21 @@ export default function BatchClient({
           />
           <label
             htmlFor="batch-csv-upload"
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:text-white text-slate-300 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
           >
             <Upload className="h-4 w-4" />
             Import CSV
           </label>
           <button
             onClick={exportBatchesToCSV}
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:text-white text-slate-300 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
           >
             <Download className="h-4 w-4" />
             Export CSV
           </button>
           <button
             onClick={handleOpenAdd}
-            className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 px-4 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 cursor-pointer"
+            className="flex items-center justify-center gap-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-sm transition cursor-pointer py-2.5 px-4 text-sm"
           >
             <Plus className="h-4 w-4" />
             Add Batch
@@ -387,16 +387,16 @@ export default function BatchClient({
           placeholder="Search by product name, batch no..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2 pl-9 pr-4 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+          className="block w-full rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
         />
       </div>
 
       {/* Table Container */}
-      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
+      <div className="overflow-hidden border border-slate-200 bg-white rounded-2xl shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-900/80 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <tr className="rx-table-header">
                 <th className="p-4">Product Name</th>
                 <th className="p-4">Batch Number</th>
                 <th className="p-4 text-center">Expiry Status</th>
@@ -406,7 +406,7 @@ export default function BatchClient({
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-sm">
+            <tbody className="divide-y divide-slate-200 text-sm">
               {filteredBatches.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-8 text-center text-slate-500">
@@ -416,50 +416,57 @@ export default function BatchClient({
               ) : (
                 filteredBatches.map((batch) => {
                   const expiryInfo = getExpiryStatus(batch.expiry_date);
+                  const badgeClass =
+                    expiryInfo.status === 'expired' || expiryInfo.status === 'critical'
+                      ? 'rx-badge-danger'
+                      : expiryInfo.status === 'warning'
+                      ? 'rx-badge-warning'
+                      : 'rx-badge-success';
+
                   return (
-                    <tr key={batch.id} className="hover:bg-slate-800/20 transition duration-150">
+                    <tr key={batch.id} className="rx-table-row">
                       <td className="p-4">
-                        <div className="font-semibold text-white">
+                        <div className="font-semibold text-slate-900">
                           {batch.products?.name || 'Unknown Product'}
                         </div>
-                        <div className="text-xs text-slate-400">
+                        <div className="text-xs text-slate-500">
                           {batch.products?.generic_name || 'No generic composition'}
                         </div>
                       </td>
-                      <td className="p-4 font-mono text-slate-200">{batch.batch_number}</td>
+                      <td className="p-4 font-mono text-slate-800">{batch.batch_number}</td>
                       <td className="p-4 text-center">
                         <span
-                          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold border ${expiryInfo.bgClass} ${expiryInfo.borderClass} ${expiryInfo.colorClass}`}
+                          className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold border ${badgeClass}`}
                         >
                           {expiryInfo.label}
                         </span>
-                        <div className="mt-1 text-[10px] text-slate-500">
+                        <div className="mt-1 text-[10px] text-slate-550">
                           Exp: {new Date(batch.expiry_date).toLocaleDateString()}
                         </div>
                       </td>
                       <td className="p-4 text-center">
-                        <span className={`font-semibold ${batch.quantity_available === 0 ? 'text-red-400' : 'text-slate-200'}`}>
+                        <span className={`font-semibold ${batch.quantity_available === 0 ? 'text-rose-600' : 'text-slate-800'}`}>
                           {batch.quantity_available}
                         </span>
                         <span className="text-xs text-slate-500"> / {batch.quantity_received}</span>
-                        <div className="text-[10px] text-slate-400 uppercase mt-0.5">{batch.products?.unit || 'units'}</div>
+                        <div className="text-[10px] text-slate-550 uppercase mt-0.5">{batch.products?.unit || 'units'}</div>
                       </td>
-                      <td className="p-4 text-center text-slate-200 font-mono text-xs">
+                      <td className="p-4 text-center text-slate-700 font-mono text-xs">
                         ₹{Number(batch.purchase_price).toFixed(2)} / ₹{Number(batch.mrp).toFixed(2)} / ₹
                         {Number(batch.selling_price).toFixed(2)}
                       </td>
-                      <td className="p-4 text-slate-300">{batch.suppliers?.name || 'Direct / Unknown'}</td>
+                      <td className="p-4 text-slate-700">{batch.suppliers?.name || 'Direct / Unknown'}</td>
                       <td className="p-4 text-right">
                         <div className="flex justify-end gap-2">
                           <button
                             onClick={() => handleOpenEdit(batch)}
-                            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-emerald-400 transition"
+                            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-teal-600 transition"
                           >
                             <Edit2 className="h-4 w-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(batch.id)}
-                            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-red-400 transition"
+                            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-rose-650 transition"
                           >
                             <Trash2 className="h-4 w-4" />
                           </button>
@@ -484,38 +491,38 @@ export default function BatchClient({
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {!editingBatch ? (
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Select Product *
                 </label>
                 <select
                   required
                   {...register('product_id')}
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white outline-none focus:border-emerald-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
                 >
                   <option value="" disabled>Select a product...</option>
                   {products.map((p) => (
-                    <option key={p.id} value={p.id}>
+                    <option key={p.id} value={p.id} className="text-slate-850">
                       {p.name} {p.generic_name && `(${p.generic_name})`}
                     </option>
                   ))}
                 </select>
                 {errors.product_id && (
-                  <p className="mt-1 text-xs text-red-400">{errors.product_id.message}</p>
+                  <p className="mt-1 text-xs text-rose-655">{errors.product_id.message}</p>
                 )}
               </div>
             ) : (
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Product
                 </label>
-                <div className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-800/30 py-2.5 px-3 text-sm text-slate-400">
+                <div className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 px-3 text-sm text-slate-600">
                   {editingBatch.products?.name}
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Batch Number *
               </label>
               <input
@@ -523,24 +530,24 @@ export default function BatchClient({
                 required
                 {...register('batch_number')}
                 placeholder="e.g. B-PRC103"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.batch_number && (
-                <p className="mt-1 text-xs text-red-400">{errors.batch_number.message}</p>
+                <p className="mt-1 text-xs text-rose-655">{errors.batch_number.message}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Supplier
               </label>
               <select
                 {...register('supplier_id')}
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
               >
-                <option value="">Direct purchase (No supplier)</option>
+                <option value="" className="text-slate-850">Direct purchase (No supplier)</option>
                 {suppliers.map((s) => (
-                  <option key={s.id} value={s.id}>
+                  <option key={s.id} value={s.id} className="text-slate-850">
                     {s.name}
                   </option>
                 ))}
@@ -548,59 +555,59 @@ export default function BatchClient({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Mfg Date
               </label>
               <input
                 type="date"
                 {...register('mfg_date')}
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Expiry Date *
               </label>
               <input
                 type="date"
                 required
                 {...register('expiry_date')}
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
               />
               {errors.expiry_date && (
-                <p className="mt-1 text-xs text-red-400">{errors.expiry_date.message}</p>
+                <p className="mt-1 text-xs text-rose-655">{errors.expiry_date.message}</p>
               )}
             </div>
 
             {!editingBatch ? (
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Quantity Received *
                 </label>
                 <input
                   type="number"
                   required
                   {...register('quantity_received')}
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white outline-none focus:border-emerald-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
                 />
                 {errors.quantity_received && (
-                  <p className="mt-1 text-xs text-red-400">{errors.quantity_received.message}</p>
+                  <p className="mt-1 text-xs text-rose-655">{errors.quantity_received.message}</p>
                 )}
               </div>
             ) : (
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Quantity Received
                 </label>
-                <div className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-800/30 py-2.5 px-3 text-sm text-slate-400">
+                <div className="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 px-3 text-sm text-slate-600">
                   {editingBatch.quantity_received} (adjust via stock ledger)
                 </div>
               </div>
             )}
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Purchase Price (Per Unit) *
               </label>
               <input
@@ -609,15 +616,15 @@ export default function BatchClient({
                 required
                 {...register('purchase_price')}
                 placeholder="₹ 0.00"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
               />
               {errors.purchase_price && (
-                <p className="mt-1 text-xs text-red-400">{errors.purchase_price.message}</p>
+                <p className="mt-1 text-xs text-rose-655">{errors.purchase_price.message}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 MRP (Max Retail Price) *
               </label>
               <input
@@ -626,13 +633,13 @@ export default function BatchClient({
                 required
                 {...register('mrp')}
                 placeholder="₹ 0.00"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
               />
-              {errors.mrp && <p className="mt-1 text-xs text-red-400">{errors.mrp.message}</p>}
+              {errors.mrp && <p className="mt-1 text-xs text-rose-655">{errors.mrp.message}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Selling Price *
               </label>
               <input
@@ -641,42 +648,42 @@ export default function BatchClient({
                 required
                 {...register('selling_price')}
                 placeholder="₹ 0.00"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
               />
               {errors.selling_price && (
-                <p className="mt-1 text-xs text-red-400">{errors.selling_price.message}</p>
+                <p className="mt-1 text-xs text-rose-655">{errors.selling_price.message}</p>
               )}
             </div>
           </div>
 
           {/* Feedback alerts */}
           {error && (
-            <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
+            <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
               <AlertTriangle className="h-5 w-5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-400">
+            <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
               <CheckCircle className="h-5 w-5 shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
 
-          <div className="flex justify-end gap-3 border-t border-slate-800 pt-4">
+          <div className="flex justify-end gap-3 border-t border-slate-200 pt-4">
             <button
               type="button"
               disabled={isPending}
               onClick={() => setIsModalOpen(false)}
-              className="rounded-xl border border-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition"
+              className="rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 px-4 py-2.5 text-sm font-semibold transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg transition hover:bg-emerald-400 disabled:opacity-50"
+              className="flex items-center justify-center gap-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-sm transition disabled:opacity-50 px-4 py-2.5 text-sm"
             >
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               {editingBatch ? 'Save Changes' : 'Record Stock-In'}

@@ -72,13 +72,13 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
   const getActionColor = (action: string | null | undefined) => {
     switch (action) {
       case 'INSERT':
-        return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400';
+        return 'rx-badge-success';
       case 'UPDATE':
-        return 'bg-amber-500/10 border-amber-500/20 text-amber-400';
+        return 'rx-badge-warning';
       case 'DELETE':
-        return 'bg-red-500/10 border-red-500/20 text-red-400';
+        return 'rx-badge-danger';
       default:
-        return 'bg-slate-800 border-slate-700 text-slate-300';
+        return 'bg-slate-100 border-slate-200 text-slate-600';
     }
   };
 
@@ -99,11 +99,11 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-          <FileText className="h-6 w-6 text-emerald-400" />
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+          <FileText className="h-6 w-6 text-teal-650" />
           System Audit Trail
         </h1>
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-slate-550">
           Permanent history of database changes, row level additions, deletions, and operator details
         </p>
       </div>
@@ -111,7 +111,7 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
       {/* Filter and Search Bar */}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
         <div className="relative flex-1">
-          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-550">
             <Search className="h-4 w-4" />
           </div>
           <input
@@ -119,14 +119,14 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
             placeholder="Search by table name, operator, or row UUID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="block w-full rounded-xl border border-slate-800 bg-slate-900/40 py-2.5 pl-10 pr-4 text-xs text-white placeholder-slate-500 outline-none focus:border-emerald-500 transition"
+            className="block w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-xs text-slate-855 placeholder-slate-400 outline-none focus:border-teal-500 transition"
           />
         </div>
 
         <select
           value={filterAction}
           onChange={(e) => setFilterAction(e.target.value)}
-          className="rounded-xl border border-slate-800 bg-slate-900/40 py-2.5 px-3 text-xs text-white outline-none focus:border-emerald-500 transition"
+          className="rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-xs text-slate-855 outline-none focus:border-teal-500 transition"
         >
           <option value="all">All Actions</option>
           <option value="INSERT">INSERT Only</option>
@@ -136,11 +136,11 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
       </div>
 
       {/* Table Container */}
-      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
+      <div className="overflow-hidden border border-slate-200 bg-white rounded-2xl shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-900/80 text-[10px] font-bold uppercase tracking-wider text-slate-450">
+              <tr className="rx-table-header">
                 <th className="p-4">Timestamp</th>
                 <th className="p-4">Action</th>
                 <th className="p-4">Target Table</th>
@@ -149,7 +149,7 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
                 <th className="p-4 text-right">Details</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-xs">
+            <tbody className="divide-y divide-slate-200 text-xs">
               {filteredLogs.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-slate-500">
@@ -163,14 +163,14 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
                     <>
                       <tr
                         key={log.id}
-                        className={`hover:bg-slate-800/10 transition cursor-pointer ${
-                          isExpanded ? 'bg-slate-800/20' : ''
+                        className={`rx-table-row cursor-pointer ${
+                          isExpanded ? 'bg-slate-50' : ''
                         }`}
                         onClick={() => toggleRow(log.id)}
                       >
                         {/* Timestamp */}
-                        <td className="p-4 font-mono text-slate-400 flex items-center gap-1.5">
-                          <Calendar className="h-3.5 w-3.5 text-slate-500" />
+                        <td className="p-4 font-mono text-slate-500 flex items-center gap-1.5">
+                          <Calendar className="h-3.5 w-3.5 text-slate-400" />
                           {new Date(log.created_at).toLocaleString()}
                         </td>
 
@@ -187,27 +187,27 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
                         </td>
 
                         {/* Table Name */}
-                        <td className="p-4 font-bold text-white uppercase tracking-wide">
+                        <td className="p-4 font-bold text-slate-900 uppercase tracking-wide">
                           {log.table_name || 'UNKNOWN'}
                         </td>
 
                         {/* Operator */}
-                        <td className="p-4 text-slate-300 flex items-center gap-1.5">
-                          <User className="h-3.5 w-3.5 text-slate-500" />
+                        <td className="p-4 text-slate-700 flex items-center gap-1.5">
+                          <User className="h-3.5 w-3.5 text-slate-400" />
                           {log.profiles?.full_name || 'System / DB Trigger'}
                         </td>
 
                         {/* Affected UUID */}
-                        <td className="p-4 font-mono text-slate-400 flex items-center gap-1.5">
+                        <td className="p-4 font-mono text-slate-500 flex items-center gap-1.5">
                           <span>{log.row_id ? `${log.row_id.substring(0, 8)}...` : 'N/A'}</span>
                           {log.row_id && (
                             <button
                               onClick={(e) => handleCopy(e, log.row_id || '')}
-                              className="rounded p-1 hover:bg-slate-800 text-slate-550 hover:text-white transition-colors"
+                              className="rounded p-1 hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors"
                               title="Copy full UUID"
                             >
                               {copiedId === log.row_id ? (
-                                <Check className="h-3 w-3 text-emerald-400" />
+                                <Check className="h-3 w-3 text-emerald-600" />
                               ) : (
                                 <Copy className="h-3 w-3" />
                               )}
@@ -222,7 +222,7 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
                               e.stopPropagation();
                               toggleRow(log.id);
                             }}
-                            className="rounded p-1 text-slate-400 hover:text-white"
+                            className="rounded p-1 text-slate-500 hover:text-slate-950"
                           >
                             {isExpanded ? (
                               <ChevronUp className="h-4 w-4" />
@@ -236,14 +236,14 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
                       {/* Expandable JSON details */}
                       {isExpanded && (
                         <tr>
-                          <td colSpan={6} className="bg-slate-950/60 p-4 border-b border-slate-800">
+                          <td colSpan={6} className="bg-slate-50/50 p-4 border-b border-slate-200">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                               {/* Old Values */}
                               <div>
-                                <div className="text-[10px] font-bold text-slate-500 uppercase mb-1">
+                                <div className="text-[10px] font-bold text-slate-600 uppercase mb-1">
                                   State Before (Old Values)
                                 </div>
-                                <pre className="max-h-60 overflow-y-auto rounded-xl border border-slate-850 bg-slate-950 p-3 text-[10px] text-red-400 font-mono">
+                                <pre className="max-h-60 overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 text-[10px] text-rose-600 font-mono shadow-inner">
                                   {log.old_values
                                     ? JSON.stringify(log.old_values, null, 2)
                                     : 'NULL / First State'}
@@ -252,10 +252,10 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
 
                               {/* New Values */}
                               <div>
-                                <div className="text-[10px] font-bold text-slate-500 uppercase mb-1">
+                                <div className="text-[10px] font-bold text-slate-600 uppercase mb-1">
                                   State After (New Values)
                                 </div>
-                                <pre className="max-h-60 overflow-y-auto rounded-xl border border-slate-850 bg-slate-950 p-3 text-[10px] text-emerald-400 font-mono">
+                                <pre className="max-h-60 overflow-y-auto rounded-xl border border-slate-200 bg-white p-3 text-[10px] text-emerald-700 font-mono shadow-inner">
                                   {log.new_values
                                     ? JSON.stringify(log.new_values, null, 2)
                                     : 'NULL / Row Deleted'}

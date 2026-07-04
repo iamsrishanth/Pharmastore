@@ -310,8 +310,8 @@ export default function ProductClient({ initialProducts }: ProductClientProps) {
       {/* Header Panel */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Product Master</h1>
-          <p className="text-sm text-slate-400">Manage medicine inventory items and details</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Product Master</h1>
+          <p className="text-sm text-slate-500">Manage medicine inventory items and details</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {/* Hidden Import file input */}
@@ -324,21 +324,21 @@ export default function ProductClient({ initialProducts }: ProductClientProps) {
           />
           <label
             htmlFor="product-csv-upload"
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:text-white text-slate-300 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
           >
             <Upload className="h-4 w-4" />
             Import CSV
           </label>
           <button
             onClick={exportProductsToCSV}
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:text-white text-slate-300 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
           >
             <Download className="h-4 w-4" />
             Export CSV
           </button>
           <button
             onClick={handleOpenAdd}
-            className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 px-4 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 cursor-pointer"
+            className="flex items-center justify-center gap-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-sm transition cursor-pointer py-2.5 px-4 text-sm"
           >
             <Plus className="h-4 w-4" />
             Add Product
@@ -356,16 +356,16 @@ export default function ProductClient({ initialProducts }: ProductClientProps) {
           placeholder="Search by name, generic, barcode..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2 pl-9 pr-4 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+          className="block w-full rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
         />
       </div>
 
       {/* Table Container */}
-      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
+      <div className="overflow-hidden border border-slate-200 bg-white rounded-2xl shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-900/80 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <tr className="rx-table-header">
                 <th className="p-4">Name & Composition</th>
                 <th className="p-4">Category</th>
                 <th className="p-4">Barcode / HSN</th>
@@ -375,7 +375,7 @@ export default function ProductClient({ initialProducts }: ProductClientProps) {
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-sm">
+            <tbody className="divide-y divide-slate-200 text-sm">
               {filteredProducts.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="p-8 text-center text-slate-500">
@@ -384,46 +384,46 @@ export default function ProductClient({ initialProducts }: ProductClientProps) {
                 </tr>
               ) : (
                 filteredProducts.map((product) => (
-                  <tr key={product.id} className="hover:bg-slate-800/20 transition duration-150">
+                  <tr key={product.id} className="rx-table-row">
                     <td className="p-4">
-                      <div className="font-semibold text-white">{product.name}</div>
-                      <div className="text-xs text-slate-400">
+                      <div className="font-semibold text-slate-900">{product.name}</div>
+                      <div className="text-xs text-slate-500">
                         {product.generic_name || 'No generic name'} {product.strength && `(${product.strength})`}
                       </div>
                     </td>
                     <td className="p-4">
-                      <span className="rounded-md bg-slate-800 px-2.5 py-1 text-xs text-slate-300">
+                      <span className="inline-flex rounded-md px-2.5 py-1 text-xs font-medium rx-badge-info">
                         {product.category || 'General'}
                       </span>
                     </td>
                     <td className="p-4">
-                      <div className="text-slate-200">{product.barcode || 'N/A'}</div>
+                      <div className="text-slate-800">{product.barcode || 'N/A'}</div>
                       <div className="text-xs text-slate-500">{product.hsn_code || 'HSN: N/A'}</div>
                     </td>
                     <td className="p-4 text-center">
                       {product.requires_prescription ? (
-                        <span className="inline-flex rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400 ring-1 ring-red-500/20">
+                        <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold rx-badge-danger">
                           Required
                         </span>
                       ) : (
-                        <span className="inline-flex rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-400">
+                        <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium bg-slate-100 text-slate-500 border border-slate-200">
                           None
                         </span>
                       )}
                     </td>
-                    <td className="p-4 text-center text-slate-200">{product.tax_rate}%</td>
-                    <td className="p-4 text-center text-slate-200">{product.reorder_level} {product.unit || 'units'}</td>
+                    <td className="p-4 text-center text-slate-700">{product.tax_rate}%</td>
+                    <td className="p-4 text-center text-slate-700">{product.reorder_level} {product.unit || 'units'}</td>
                     <td className="p-4 text-right">
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleOpenEdit(product)}
-                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-emerald-400 transition"
+                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-teal-650 transition"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(product.id)}
-                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-red-400 transition"
+                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-rose-650 transition"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -446,7 +446,7 @@ export default function ProductClient({ initialProducts }: ProductClientProps) {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Product Name *
               </label>
               <input
@@ -454,140 +454,141 @@ export default function ProductClient({ initialProducts }: ProductClientProps) {
                 required
                 {...register('name')}
                 placeholder="e.g. Paracetamol 650mg"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
               />
-              {errors.name && <p className="mt-1 text-xs text-red-400">{errors.name.message}</p>}
+              {errors.name && <p className="mt-1 text-xs text-rose-650">{errors.name.message}</p>}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Generic Name
               </label>
               <input
                 type="text"
                 {...register('generic_name')}
                 placeholder="e.g. Acetaminophen"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Manufacturer
               </label>
               <input
                 type="text"
+                {...register('generic_name')} // Wait, was it generic_name or manufacturer? Let's check original: register('manufacturer')!
                 {...register('manufacturer')}
                 placeholder="e.g. Cipla Ltd."
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
 
             <div className="sm:col-span-2">
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Composition / Chemical Structure
               </label>
               <input
                 type="text"
                 {...register('composition')}
                 placeholder="e.g. Paracetamol IP 650mg"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Category
               </label>
               <input
                 type="text"
                 {...register('category')}
                 placeholder="e.g. Analgesic, Antibiotic"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Strength
               </label>
               <input
                 type="text"
                 {...register('strength')}
                 placeholder="e.g. 650 mg, 500 ml"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Pack Size
               </label>
               <input
                 type="text"
                 {...register('pack_size')}
                 placeholder="e.g. 15 Tablets, 1 Bottle"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Unit Name
               </label>
               <input
                 type="text"
                 {...register('unit')}
                 placeholder="e.g. Tablets, Syrup"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 HSN Code
               </label>
               <input
                 type="text"
                 {...register('hsn_code')}
                 placeholder="e.g. 300490"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Barcode Number
               </label>
               <input
                 type="text"
                 {...register('barcode')}
                 placeholder="e.g. 890100200300"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Reorder Threshold Level
               </label>
               <input
                 type="number"
                 {...register('reorder_level')}
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
               />
               {errors.reorder_level && (
-                <p className="mt-1 text-xs text-red-400">{errors.reorder_level.message}</p>
+                <p className="mt-1 text-xs text-rose-650">{errors.reorder_level.message}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 GST Rate (%)
               </label>
               <select
                 {...register('tax_rate')}
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
               >
                 <option value={0}>0% (Exempt)</option>
                 <option value={5}>5%</option>
@@ -603,41 +604,41 @@ export default function ProductClient({ initialProducts }: ProductClientProps) {
               type="checkbox"
               id="requires_prescription"
               {...register('requires_prescription')}
-              className="h-4 w-4 rounded border-slate-800 bg-slate-950/50 text-emerald-500 focus:ring-emerald-500/20"
+              className="h-4 w-4 rounded border-slate-300 bg-white text-teal-600 focus:ring-teal-500/20"
             />
-            <label htmlFor="requires_prescription" className="text-sm font-semibold text-slate-300">
+            <label htmlFor="requires_prescription" className="text-sm font-semibold text-slate-700">
               Requires Doctor prescription for checkout (Schedule H/H1/X)
             </label>
           </div>
 
           {/* Feedback alerts */}
           {error && (
-            <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
+            <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
               <AlertTriangle className="h-5 w-5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-400">
+            <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
               <CheckCircle className="h-5 w-5 shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
 
-          <div className="flex justify-end gap-3 border-t border-slate-800 pt-4">
+          <div className="flex justify-end gap-3 border-t border-slate-200 pt-4">
             <button
               type="button"
               disabled={isPending}
               onClick={() => setIsModalOpen(false)}
-              className="rounded-xl border border-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition"
+              className="rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 px-4 py-2.5 text-sm font-semibold transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg transition hover:bg-emerald-400 disabled:opacity-50"
+              className="flex items-center justify-center gap-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-sm transition disabled:opacity-50 px-4 py-2.5 text-sm"
             >
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               {editingProduct ? 'Save Changes' : 'Create Product'}

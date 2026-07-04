@@ -61,17 +61,17 @@ export default function AdminSettingsPage() {
     <div className="space-y-6 max-w-4xl">
       {/* Title */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white flex items-center gap-2">
-          <Settings className="h-6 w-6 text-emerald-400" />
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
+          <Settings className="h-6 w-6 text-teal-650" />
           Global Configurations
         </h1>
-        <p className="text-sm text-slate-400">
+        <p className="text-sm text-slate-550">
           Manage pharmacy metadata, default taxation rates, billing parameters, and store information
         </p>
       </div>
 
       {success && (
-        <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-400">
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-250 bg-emerald-50 p-4 text-sm text-emerald-700">
           <CheckCircle className="h-5 w-5 shrink-0" />
           <span>Pharmacy configurations updated successfully!</span>
         </div>
@@ -80,90 +80,90 @@ export default function AdminSettingsPage() {
       {/* Main Settings Form */}
       <form onSubmit={handleSave} className="space-y-6">
         {/* Card 1: Store info */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 backdrop-blur-md space-y-4">
-          <h2 className="text-sm font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
-            <Store className="h-4 w-4 text-emerald-400" />
+        <div className="rx-card space-y-4">
+          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-3">
+            <Store className="h-4 w-4 text-teal-650" />
             Store Metadata
           </h2>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Pharmacy / Business Name</label>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Pharmacy / Business Name</label>
               <input
                 type="text"
                 required
                 value={storeName}
                 onChange={(e) => setStoreName(e.target.value)}
-                className="mt-2 block w-full rounded-xl border border-slate-850 bg-slate-950/50 py-2.5 px-3 text-xs text-white placeholder-slate-500 outline-none focus:border-emerald-500 transition"
+                className="mt-2 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-xs text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 transition"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Contact Phone</label>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Contact Phone</label>
               <input
                 type="text"
                 value={storePhone}
                 onChange={(e) => setStorePhone(e.target.value)}
-                className="mt-2 block w-full rounded-xl border border-slate-850 bg-slate-950/50 py-2.5 px-3 text-xs text-white placeholder-slate-500 outline-none focus:border-emerald-500 transition"
+                className="mt-2 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-xs text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 transition"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Support Email</label>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Support Email</label>
               <input
                 type="email"
                 value={storeEmail}
                 onChange={(e) => setStoreEmail(e.target.value)}
-                className="mt-2 block w-full rounded-xl border border-slate-850 bg-slate-950/50 py-2.5 px-3 text-xs text-white placeholder-slate-500 outline-none focus:border-emerald-500 transition"
+                className="mt-2 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-xs text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 transition"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Physical Address</label>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Physical Address</label>
               <input
                 type="text"
                 value={storeAddress}
                 onChange={(e) => setStoreAddress(e.target.value)}
-                className="mt-2 block w-full rounded-xl border border-slate-850 bg-slate-950/50 py-2.5 px-3 text-xs text-white placeholder-slate-500 outline-none focus:border-emerald-500 transition"
+                className="mt-2 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-xs text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 transition"
               />
             </div>
           </div>
         </div>
 
         {/* Card 2: Billing defaults */}
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 backdrop-blur-md space-y-4">
-          <h2 className="text-sm font-bold text-white flex items-center gap-2 border-b border-slate-800 pb-3">
-            <FileText className="h-4 w-4 text-emerald-400" />
+        <div className="rx-card space-y-4">
+          <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-3">
+            <FileText className="h-4 w-4 text-teal-650" />
             Billing & Ingestion Defaults
           </h2>
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Pharmacy GSTIN</label>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Pharmacy GSTIN</label>
               <input
                 type="text"
                 placeholder="GSTIN Number"
                 value={gstin}
                 onChange={(e) => setGstin(e.target.value)}
-                className="mt-2 block w-full rounded-xl border border-slate-850 bg-slate-950/50 py-2.5 px-3 text-xs text-white placeholder-slate-500 outline-none focus:border-emerald-500 transition"
+                className="mt-2 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-xs text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 transition"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Default Tax Rate (GST %)</label>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Default Tax Rate (GST %)</label>
               <input
                 type="number"
                 min={0}
                 max={100}
                 value={defaultTax}
                 onChange={(e) => setDefaultTax(Number(e.target.value))}
-                className="mt-2 block w-full rounded-xl border border-slate-850 bg-slate-950/50 py-2.5 px-3 text-xs text-white outline-none focus:border-emerald-500 transition"
+                className="mt-2 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-xs text-slate-850 outline-none focus:border-teal-500 transition"
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">Default Reorder Level</label>
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Default Reorder Level</label>
               <input
                 type="number"
                 min={1}
                 value={defaultReorder}
                 onChange={(e) => setDefaultReorder(Number(e.target.value))}
-                className="mt-2 block w-full rounded-xl border border-slate-850 bg-slate-950/50 py-2.5 px-3 text-xs text-white outline-none focus:border-emerald-500 transition"
+                className="mt-2 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-xs text-slate-850 outline-none focus:border-teal-500 transition"
               />
             </div>
           </div>
@@ -174,11 +174,11 @@ export default function AdminSettingsPage() {
           <button
             type="submit"
             disabled={isSaving}
-            className="flex items-center gap-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 px-6 py-3 text-xs font-bold text-slate-950 disabled:opacity-50 transition shadow-lg shadow-emerald-500/10 cursor-pointer"
+            className="flex items-center gap-2 rounded-xl bg-teal-600 hover:bg-teal-700 px-6 py-3 text-xs font-bold text-white disabled:opacity-50 transition shadow-sm cursor-pointer"
           >
             {isSaving ? (
               <>
-                <div className="animate-spin rounded-full border-2 border-slate-950 border-t-transparent h-4 w-4" />
+                <div className="animate-spin rounded-full border-2 border-white border-t-transparent h-4 w-4" />
                 Saving Changes...
               </>
             ) : (

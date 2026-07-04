@@ -254,8 +254,8 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
       {/* Header Panel */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Supplier Master</h1>
-          <p className="text-sm text-slate-400">Manage medicine manufacturers, distributors, and logistics partners</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Supplier Master</h1>
+          <p className="text-sm text-slate-555">Manage medicine manufacturers, distributors, and logistics partners</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {/* Hidden Import file input */}
@@ -268,21 +268,21 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
           />
           <label
             htmlFor="supplier-csv-upload"
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:text-white text-slate-300 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
           >
             <Upload className="h-4 w-4" />
             Import CSV
           </label>
           <button
             onClick={exportSuppliersToCSV}
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-800 bg-slate-900/50 hover:bg-slate-800 hover:text-white text-slate-300 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 py-2.5 px-4 text-sm font-semibold transition cursor-pointer"
           >
             <Download className="h-4 w-4" />
             Export CSV
           </button>
           <button
             onClick={handleOpenAdd}
-            className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 px-4 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400 cursor-pointer"
+            className="flex items-center justify-center gap-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-sm transition cursor-pointer py-2.5 px-4 text-sm"
           >
             <Plus className="h-4 w-4" />
             Add Supplier
@@ -300,16 +300,16 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
           placeholder="Search suppliers by name, GSTIN, phone..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2 pl-9 pr-4 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+          className="block w-full rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
         />
       </div>
 
       {/* Table Container */}
-      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
+      <div className="overflow-hidden border border-slate-200 bg-white rounded-2xl shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-900/80 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <tr className="rx-table-header">
                 <th className="p-4">Supplier Name</th>
                 <th className="p-4">Contact Person</th>
                 <th className="p-4">Phone / Email</th>
@@ -318,7 +318,7 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-sm">
+            <tbody className="divide-y divide-slate-200 text-sm">
               {filteredSuppliers.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-slate-500">
@@ -327,28 +327,28 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
                 </tr>
               ) : (
                 filteredSuppliers.map((sup) => (
-                  <tr key={sup.id} className="hover:bg-slate-800/20 transition duration-150">
-                    <td className="p-4 font-semibold text-white">{sup.name}</td>
-                    <td className="p-4 text-slate-300">{sup.contact_person || 'N/A'}</td>
-                    <td className="p-4 text-slate-300">
+                  <tr key={sup.id} className="rx-table-row">
+                    <td className="p-4 font-semibold text-slate-900">{sup.name}</td>
+                    <td className="p-4 text-slate-700">{sup.contact_person || 'N/A'}</td>
+                    <td className="p-4 text-slate-750">
                       <div>{sup.phone || 'N/A'}</div>
                       <div className="text-xs text-slate-500">{sup.email || ''}</div>
                     </td>
-                    <td className="p-4 font-mono text-slate-300 text-xs">{sup.gstin || 'N/A'}</td>
-                    <td className="p-4 text-slate-400 max-w-xs truncate" title={sup.address || ''}>
+                    <td className="p-4 font-mono text-slate-700 text-xs">{sup.gstin || 'N/A'}</td>
+                    <td className="p-4 text-slate-500 max-w-xs truncate" title={sup.address || ''}>
                       {sup.address || 'N/A'}
                     </td>
                     <td className="p-4 text-right">
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleOpenEdit(sup)}
-                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-emerald-400 transition"
+                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-teal-650 transition"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(sup.id)}
-                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-red-400 transition"
+                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-rose-650 transition"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -371,7 +371,7 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Supplier / Business Name *
               </label>
               <input
@@ -379,109 +379,109 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
                 required
                 {...register('name')}
                 placeholder="e.g. Apex Distributors"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.name && (
-                <p className="mt-1 text-xs text-red-400">{errors.name.message}</p>
+                <p className="mt-1 text-xs text-rose-655">{errors.name.message}</p>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Contact Person
                 </label>
                 <input
                   type="text"
                   {...register('contact_person')}
                   placeholder="e.g. Amit Patel"
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   GSTIN (Tax ID)
                 </label>
                 <input
                   type="text"
                   {...register('gstin')}
                   placeholder="e.g. 07AAAAA1111A1Z1"
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Phone Number
                 </label>
                 <input
                   type="text"
                   {...register('phone')}
                   placeholder="e.g. +91 98765 43210"
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Email Address
                 </label>
                 <input
                   type="email"
                   {...register('email')}
                   placeholder="info@apex.com"
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
                 {errors.email && (
-                  <p className="mt-1 text-xs text-red-400">{errors.email.message}</p>
+                  <p className="mt-1 text-xs text-rose-655">{errors.email.message}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Full Business Address
               </label>
               <textarea
                 {...register('address')}
                 rows={3}
                 placeholder="Street address, City, Pin Code..."
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 resize-none"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 resize-none"
               />
             </div>
           </div>
 
           {/* Feedback alerts */}
           {error && (
-            <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
+            <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
               <AlertTriangle className="h-5 w-5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-400">
+            <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
               <CheckCircle className="h-5 w-5 shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
 
-          <div className="flex justify-end gap-3 border-t border-slate-800 pt-4">
+          <div className="flex justify-end gap-3 border-t border-slate-200 pt-4">
             <button
               type="button"
               disabled={isPending}
               onClick={() => setIsModalOpen(false)}
-              className="rounded-xl border border-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition"
+              className="rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 px-4 py-2.5 text-sm font-semibold transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg transition hover:bg-emerald-400 disabled:opacity-50"
+              className="flex items-center justify-center gap-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-sm transition disabled:opacity-50 px-4 py-2.5 text-sm"
             >
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               {editingSupplier ? 'Save Changes' : 'Register Supplier'}

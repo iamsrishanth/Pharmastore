@@ -143,12 +143,12 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
       {/* Header Panel */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-white">Employee Management</h1>
-          <p className="text-sm text-slate-400">Add, edit, or deactivate store operators and administrators</p>
+          <h1 className="text-2xl font-bold tracking-tight text-slate-900">Employee Management</h1>
+          <p className="text-sm text-slate-550">Add, edit, or deactivate store operators and administrators</p>
         </div>
         <button
           onClick={handleOpenAdd}
-          className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 py-2.5 px-4 text-sm font-semibold text-slate-950 transition hover:bg-emerald-400"
+          className="flex items-center justify-center gap-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-sm transition py-2.5 px-4 text-sm"
         >
           <Plus className="h-4 w-4" />
           Add Employee
@@ -157,7 +157,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
 
       {/* Search Bar */}
       <div className="relative max-w-md">
-        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-550">
           <Search className="h-4 w-4" />
         </div>
         <input
@@ -165,16 +165,16 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
           placeholder="Search employees by name, email, phone..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full rounded-xl border border-slate-800 bg-slate-900/50 py-2 pl-9 pr-4 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+          className="block w-full rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
         />
       </div>
 
       {/* Table Container */}
-      <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
+      <div className="overflow-hidden border border-slate-200 bg-white rounded-2xl shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-800 bg-slate-900/80 text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <tr className="rx-table-header">
                 <th className="p-4">Full Name</th>
                 <th className="p-4">Email Address</th>
                 <th className="p-4">Role Badge</th>
@@ -183,7 +183,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                 <th className="p-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60 text-sm">
+            <tbody className="divide-y divide-slate-200 text-sm">
               {filteredEmployees.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center text-slate-500">
@@ -192,28 +192,28 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                 </tr>
               ) : (
                 filteredEmployees.map((emp) => (
-                  <tr key={emp.id} className="hover:bg-slate-800/20 transition duration-150">
-                    <td className="p-4 font-semibold text-white">{emp.full_name}</td>
-                    <td className="p-4 text-slate-300">{emp.email || 'No email associated'}</td>
+                  <tr key={emp.id} className="rx-table-row">
+                    <td className="p-4 font-semibold text-slate-900">{emp.full_name}</td>
+                    <td className="p-4 text-slate-700">{emp.email || 'No email associated'}</td>
                     <td className="p-4">
                       <span
                         className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold tracking-wide border uppercase ${
                           emp.role === 'admin'
-                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                            : 'bg-blue-500/10 border-blue-500/20 text-blue-400'
+                            ? 'rx-badge-success'
+                            : 'rx-badge-info'
                         }`}
                       >
                         {emp.role}
                       </span>
                     </td>
-                    <td className="p-4 text-slate-300">{emp.phone || 'N/A'}</td>
+                    <td className="p-4 text-slate-700">{emp.phone || 'N/A'}</td>
                     <td className="p-4 text-center">
                       {emp.is_active ? (
-                        <span className="inline-flex rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium text-emerald-400">
+                        <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold rx-badge-success">
                           Active
                         </span>
                       ) : (
-                        <span className="inline-flex rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-medium text-red-400">
+                        <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold rx-badge-danger">
                           Deactivated
                         </span>
                       )}
@@ -222,7 +222,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleOpenEdit(emp)}
-                          className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-800 hover:text-emerald-400 transition"
+                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-teal-600 transition"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
@@ -230,8 +230,8 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                           onClick={() => handleToggleStatus(emp.id, emp.is_active)}
                           className={`rounded-lg p-1.5 transition ${
                             emp.is_active
-                              ? 'text-red-400 hover:bg-slate-800 hover:text-red-300'
-                              : 'text-emerald-400 hover:bg-slate-800 hover:text-emerald-300'
+                              ? 'text-rose-700 hover:bg-rose-50 hover:text-rose-800'
+                              : 'text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800'
                           }`}
                           title={emp.is_active ? 'Deactivate User' : 'Activate User'}
                         >
@@ -260,7 +260,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Full Name *
               </label>
               <input
@@ -268,15 +268,15 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                 required
                 {...register('full_name')}
                 placeholder="e.g. Rahul Sharma"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.full_name && (
-                <p className="mt-1 text-xs text-red-400">{errors.full_name.message}</p>
+                <p className="mt-1 text-xs text-rose-655">{errors.full_name.message}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Email Address *
               </label>
               <input
@@ -284,15 +284,15 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                 required
                 {...register('email')}
                 placeholder="rahul@pharmastore.com"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.email && (
-                <p className="mt-1 text-xs text-red-400">{errors.email.message}</p>
+                <p className="mt-1 text-xs text-rose-655">{errors.email.message}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Password {editingEmployee && '(leave blank to keep current)'} *
               </label>
               <input
@@ -300,37 +300,37 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                 required={!editingEmployee}
                 {...register('password')}
                 placeholder="••••••••"
-                className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.password && (
-                <p className="mt-1 text-xs text-red-400">{errors.password.message}</p>
+                <p className="mt-1 text-xs text-rose-655">{errors.password.message}</p>
               )}
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   Contact Phone
                 </label>
                 <input
                   type="text"
                   {...register('phone')}
                   placeholder="+91 XXXXX XXXXX"
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white placeholder-slate-500 outline-none focus:border-emerald-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                   User Role *
                 </label>
                 <select
                   required
                   {...register('role')}
-                  className="mt-1 block w-full rounded-xl border border-slate-800 bg-slate-950/50 py-2.5 px-3 text-sm text-white outline-none focus:border-emerald-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
                 >
-                  <option value="employee">Employee</option>
-                  <option value="admin">Admin</option>
+                  <option value="employee" className="text-slate-850">Employee</option>
+                  <option value="admin" className="text-slate-850">Admin</option>
                 </select>
               </div>
             </div>
@@ -340,9 +340,9 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                 type="checkbox"
                 id="is_active"
                 {...register('is_active')}
-                className="h-4 w-4 rounded border-slate-800 bg-slate-950/50 text-emerald-500 focus:ring-emerald-500/20"
+                className="h-4 w-4 rounded border-slate-300 bg-white text-teal-600 focus:ring-teal-500/20"
               />
-              <label htmlFor="is_active" className="text-sm font-semibold text-slate-300">
+              <label htmlFor="is_active" className="text-sm font-semibold text-slate-700">
                 Account Active (User can log in)
               </label>
             </div>
@@ -350,32 +350,32 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
 
           {/* Feedback alerts */}
           {error && (
-            <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
+            <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
               <AlertTriangle className="h-5 w-5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           {successMsg && (
-            <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-400">
+            <div className="flex items-center gap-2 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-700">
               <CheckCircle className="h-5 w-5 shrink-0" />
               <span>{successMsg}</span>
             </div>
           )}
 
-          <div className="flex justify-end gap-3 border-t border-slate-800 pt-4">
+          <div className="flex justify-end gap-3 border-t border-slate-200 pt-4">
             <button
               type="button"
               disabled={isPending}
               onClick={() => setIsModalOpen(false)}
-              className="rounded-xl border border-slate-800 px-4 py-2.5 text-sm font-semibold text-slate-400 hover:bg-slate-800 hover:text-white transition"
+              className="rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 text-slate-700 px-4 py-2.5 text-sm font-semibold transition"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isPending}
-              className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-slate-950 shadow-lg transition hover:bg-emerald-400 disabled:opacity-50"
+              className="flex items-center justify-center gap-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-semibold shadow-sm transition disabled:opacity-50 px-4 py-2.5 text-sm"
             >
               {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
               {editingEmployee ? 'Save Changes' : 'Register User'}

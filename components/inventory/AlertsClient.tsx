@@ -147,20 +147,20 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
     <div className="space-y-6">
       {/* Header Panel */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-white">Ops & Inventory Alerts</h1>
-        <p className="text-sm text-slate-400">
+        <h1 className="text-2xl font-bold tracking-tight text-slate-900">Ops & Inventory Alerts</h1>
+        <p className="text-sm text-slate-550">
           Track low-stock medicines, inspect expired/critical items, and prepare supplier returns
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-slate-800 bg-slate-900/30 p-1 rounded-xl max-w-md">
+      <div className="flex border border-slate-200 bg-slate-100 p-1 rounded-xl max-w-md">
         <button
           onClick={() => setActiveTab('low-stock')}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-semibold transition ${
             activeTab === 'low-stock'
-              ? 'bg-slate-800 text-emerald-400'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-white text-teal-700 shadow-sm'
+              : 'text-slate-550 hover:text-slate-800'
           }`}
         >
           <AlertTriangle className="h-4 w-4" />
@@ -171,8 +171,8 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
           onClick={() => setActiveTab('expiry')}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-semibold transition ${
             activeTab === 'expiry'
-              ? 'bg-slate-800 text-emerald-400'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-white text-teal-700 shadow-sm'
+              : 'text-slate-550 hover:text-slate-800'
           }`}
         >
           <Layers className="h-4 w-4" />
@@ -183,8 +183,8 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
           onClick={() => setActiveTab('returns')}
           className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-semibold transition ${
             activeTab === 'returns'
-              ? 'bg-slate-800 text-emerald-400'
-              : 'text-slate-400 hover:text-slate-200'
+              ? 'bg-white text-teal-700 shadow-sm'
+              : 'text-slate-550 hover:text-slate-800'
           }`}
         >
           <Truck className="h-4 w-4" />
@@ -194,14 +194,14 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
 
       {/* Success/Error displays */}
       {successMsg && (
-        <div className="flex items-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-3 text-sm text-emerald-400">
+        <div className="flex items-center gap-2 rounded-xl border border-emerald-250 bg-emerald-50 p-3 text-sm text-emerald-700">
           <CheckCircle className="h-5 w-5 shrink-0" />
           <span>{successMsg}</span>
         </div>
       )}
 
       {errorMsg && (
-        <div className="flex items-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-400">
+        <div className="flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-700">
           <AlertCircle className="h-5 w-5 shrink-0" />
           <span>{errorMsg}</span>
         </div>
@@ -209,11 +209,11 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
 
       {/* Tab Contents */}
       {activeTab === 'low-stock' && (
-        <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
+        <div className="overflow-hidden border border-slate-200 bg-white rounded-2xl shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/80 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <tr className="rx-table-header">
                   <th className="p-4">Medicine Name</th>
                   <th className="p-4">Generic Formula</th>
                   <th className="p-4 text-center">Current Total Stock</th>
@@ -221,7 +221,7 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
                   <th className="p-4 text-right">Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-sm">
+              <tbody className="divide-y divide-slate-200 text-sm">
                 {lowStockItems.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="p-8 text-center text-slate-500">
@@ -230,15 +230,15 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
                   </tr>
                 ) : (
                   lowStockItems.map((item) => (
-                    <tr key={item.product_id} className="hover:bg-slate-800/10 transition">
-                      <td className="p-4 font-bold text-white">{item.name}</td>
-                      <td className="p-4 text-slate-350">{item.generic_name || 'N/A'}</td>
-                      <td className="p-4 text-center font-semibold text-red-400">
-                        {item.total_stock} <span className="text-[10px] text-slate-500 uppercase">{item.unit || 'units'}</span>
+                    <tr key={item.product_id} className="rx-table-row">
+                      <td className="p-4 font-bold text-slate-900">{item.name}</td>
+                      <td className="p-4 text-slate-550">{item.generic_name || 'N/A'}</td>
+                      <td className="p-4 text-center font-semibold text-rose-600">
+                        {item.total_stock} <span className="text-[10px] text-slate-550 uppercase">{item.unit || 'units'}</span>
                       </td>
-                      <td className="p-4 text-center text-slate-300 font-mono">{item.reorder_level}</td>
+                      <td className="p-4 text-center text-slate-700 font-mono">{item.reorder_level}</td>
                       <td className="p-4 text-right">
-                        <span className="inline-flex rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-bold text-red-400">
+                        <span className="inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold rx-badge-danger">
                           Reorder Alert
                         </span>
                       </td>
@@ -252,11 +252,11 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
       )}
 
       {activeTab === 'expiry' && (
-        <div className="overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/40 backdrop-blur-md">
+        <div className="overflow-hidden border border-slate-200 bg-white rounded-2xl shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/80 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <tr className="rx-table-header">
                   <th className="p-4">Medicine Details</th>
                   <th className="p-4">Batch Number</th>
                   <th className="p-4 text-center">Expiry Status</th>
@@ -264,7 +264,7 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
                   <th className="p-4">Supplier</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 text-sm">
+              <tbody className="divide-y divide-slate-200 text-sm">
                 {batchAlerts.length === 0 ? (
                   <tr>
                     <td colSpan={5} className="p-8 text-center text-slate-500">
@@ -274,16 +274,23 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
                 ) : (
                   batchAlerts.map((batch) => {
                     const statusInfo = getExpiryStatus(batch.expiry_date);
+                    const badgeClass =
+                      statusInfo.status === 'expired' || statusInfo.status === 'critical'
+                        ? 'rx-badge-danger'
+                        : statusInfo.status === 'warning'
+                        ? 'rx-badge-warning'
+                        : 'rx-badge-success';
+
                     return (
-                      <tr key={batch.id} className="hover:bg-slate-800/10 transition">
-                        <td className="p-4 font-bold text-white">
+                      <tr key={batch.id} className="rx-table-row">
+                        <td className="p-4 font-bold text-slate-900">
                           <div>{batch.product_name}</div>
-                          <div className="text-xs text-slate-400 font-normal">{batch.generic_name || ''}</div>
+                          <div className="text-xs text-slate-500 font-normal">{batch.generic_name || ''}</div>
                         </td>
-                        <td className="p-4 font-mono text-slate-200">{batch.batch_number}</td>
+                        <td className="p-4 font-mono text-slate-800">{batch.batch_number}</td>
                         <td className="p-4 text-center">
                           <span
-                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold border ${statusInfo.bgClass} ${statusInfo.borderClass} ${statusInfo.colorClass}`}
+                            className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold border ${badgeClass}`}
                           >
                             {statusInfo.label}
                           </span>
@@ -291,8 +298,8 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
                             Exp: {new Date(batch.expiry_date).toLocaleDateString()}
                           </div>
                         </td>
-                        <td className="p-4 text-center text-slate-200 font-semibold">{batch.quantity_available}</td>
-                        <td className="p-4 text-slate-350">{batch.supplier_name || 'Direct / Unknown'}</td>
+                        <td className="p-4 text-center text-slate-800 font-semibold">{batch.quantity_available}</td>
+                        <td className="p-4 text-slate-700">{batch.supplier_name || 'Direct / Unknown'}</td>
                       </tr>
                     );
                   })
@@ -306,7 +313,7 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
       {activeTab === 'returns' && (
         <div className="space-y-6">
           {Object.keys(supplierReturns).length === 0 ? (
-            <div className="rounded-2xl border border-slate-800 bg-slate-900/40 p-8 text-center text-slate-500">
+            <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center text-slate-500 shadow-sm">
               No near-expiry inventory available to process for supplier returns.
             </div>
           ) : (
@@ -316,36 +323,36 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
               return (
                 <div
                   key={sId}
-                  className="rounded-2xl border border-slate-800 bg-slate-900/40 p-6 space-y-4"
+                  className="rx-card space-y-4"
                 >
                   {/* Supplier Card Info Header */}
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-800 pb-4">
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4">
                     <div>
-                      <h3 className="text-base font-bold text-white flex items-center gap-1.5">
-                        <Truck className="h-5 w-5 text-emerald-400" />
+                      <h3 className="text-base font-bold text-slate-900 flex items-center gap-1.5">
+                        <Truck className="h-5 w-5 text-teal-650" />
                         {data.supplierName}
                       </h3>
                       {data.phone || data.email ? (
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-xs text-slate-500 mt-1">
                           {data.phone && `Phone: ${data.phone}`} {data.email && `• Email: ${data.email}`}
                         </p>
                       ) : (
-                        <p className="text-xs text-slate-500 mt-1">No supplier contact details available</p>
+                        <p className="text-xs text-slate-400 mt-1">No supplier contact details available</p>
                       )}
                     </div>
                     <div className="text-right">
-                      <div className="text-xs text-slate-450 uppercase tracking-wider">Return Valuation</div>
-                      <div className="text-lg font-mono font-bold text-emerald-400">
+                      <div className="text-xs text-slate-500 uppercase tracking-wider">Return Valuation</div>
+                      <div className="text-lg font-mono font-bold text-emerald-700">
                         ₹{totalValuation.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </div>
                     </div>
                   </div>
 
                   {/* Table of items returning to this supplier */}
-                  <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/20">
+                  <div className="overflow-x-auto rounded-xl border border-slate-200 bg-slate-50/50">
                     <table className="w-full text-left text-xs border-collapse">
                       <thead>
-                        <tr className="border-b border-slate-800/80 bg-slate-900/30 text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                        <tr className="border-b border-slate-200 bg-slate-100/80 text-[10px] font-bold uppercase tracking-wider text-slate-550">
                           <th className="p-3">Medicine</th>
                           <th className="p-3">Batch Number</th>
                           <th className="p-3">Expiry Date</th>
@@ -354,18 +361,18 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
                           <th className="p-3 text-right">Value (INR)</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-850 text-slate-300">
+                      <tbody className="divide-y divide-slate-200 text-slate-700">
                         {data.items.map((item) => (
-                          <tr key={item.id} className="hover:bg-slate-900/10">
-                            <td className="p-3 font-bold text-slate-200">{item.product_name}</td>
-                            <td className="p-3 font-mono text-slate-350">{item.batch_number}</td>
-                            <td className="p-3 flex items-center gap-1">
-                              <Calendar className="h-3 w-3 text-slate-500" />
+                          <tr key={item.id} className="hover:bg-slate-100/50">
+                            <td className="p-3 font-bold text-slate-900">{item.product_name}</td>
+                            <td className="p-3 font-mono text-slate-700">{item.batch_number}</td>
+                            <td className="p-3 flex items-center gap-1 text-slate-600">
+                              <Calendar className="h-3 w-3 text-slate-400" />
                               {new Date(item.expiry_date).toLocaleDateString()}
                             </td>
-                            <td className="p-3 text-center font-semibold text-white">{item.quantity}</td>
+                            <td className="p-3 text-center font-semibold text-slate-900">{item.quantity}</td>
                             <td className="p-3 text-right font-mono">₹{item.purchase_price.toFixed(2)}</td>
-                            <td className="p-3 text-right font-mono text-white">₹{item.total_value.toFixed(2)}</td>
+                            <td className="p-3 text-right font-mono text-slate-900 font-semibold">₹{item.total_value.toFixed(2)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -376,15 +383,15 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
                   <div className="flex justify-end gap-3 pt-2">
                     <button
                       onClick={() => handleExportCSV(data.supplierName, data.items)}
-                      className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 py-2 px-4 text-xs font-semibold text-slate-200 transition"
+                      className="flex items-center justify-center gap-1.5 rounded-xl border border-slate-300 bg-slate-50 hover:bg-slate-100 py-2 px-4 text-xs font-semibold text-slate-700 transition"
                     >
-                      <Download className="h-4 w-4 text-emerald-400" />
+                      <Download className="h-4 w-4 text-teal-600" />
                       Export Return CSV
                     </button>
                     <button
                       onClick={() => handleProcessSupplierReturn(sId, data.supplierName, data.items)}
                       disabled={isPending || sId === 'direct'}
-                      className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 py-2 px-4 text-xs font-semibold text-slate-950 disabled:opacity-50 transition"
+                      className="flex items-center justify-center gap-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 py-2 px-4 text-xs font-semibold text-white disabled:opacity-50 transition shadow-sm"
                       title={sId === 'direct' ? 'Cannot return direct purchase batches automatically' : ''}
                     >
                       {isPending ? (
