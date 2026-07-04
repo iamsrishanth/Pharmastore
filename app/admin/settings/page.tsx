@@ -80,7 +80,7 @@ export default function AdminSettingsPage() {
       {/* Main Settings Form */}
       <form onSubmit={handleSave} className="space-y-6">
         {/* Card 1: Store info */}
-        <div className="rx-card space-y-4">
+        <div className="rx-card p-6 space-y-4">
           <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-3">
             <Store className="h-4 w-4 text-teal-650" />
             Store Metadata
@@ -128,7 +128,7 @@ export default function AdminSettingsPage() {
         </div>
 
         {/* Card 2: Billing defaults */}
-        <div className="rx-card space-y-4">
+        <div className="rx-card p-6 space-y-4">
           <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2 border-b border-slate-200 pb-3">
             <FileText className="h-4 w-4 text-teal-650" />
             Billing & Ingestion Defaults

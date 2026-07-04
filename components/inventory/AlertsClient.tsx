@@ -323,7 +323,7 @@ export default function AlertsClient({ lowStockItems, batchAlerts }: AlertsClien
               return (
                 <div
                   key={sId}
-                  className="rx-card space-y-4"
+                  className="rx-card p-6 space-y-4"
                 >
                   {/* Supplier Card Info Header */}
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4">

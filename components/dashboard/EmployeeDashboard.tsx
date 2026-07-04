@@ -131,7 +131,7 @@ export default function EmployeeDashboard({
       </div>
 
       {/* Quick Search Stock Section */}
-      <div className="rx-card">
+      <div className="rx-card p-6">
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-lg font-bold text-slate-900">Quick Stock Lookup</h2>
