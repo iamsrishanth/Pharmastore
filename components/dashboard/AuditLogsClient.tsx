@@ -17,8 +17,8 @@ import {
 
 interface AuditLog {
   id: string;
-  table_name: string;
-  action: string;
+  table_name: string | null;
+  action: string | null;
   row_id: string | null;
   old_values: any;
   new_values: any;
@@ -51,19 +51,25 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
   };
 
   const filteredLogs = logs.filter((log) => {
+    if (!log) return false;
     const query = searchQuery.toLowerCase();
-    const matchesSearch =
-      log.table_name.toLowerCase().includes(query) ||
-      log.action.toLowerCase().includes(query) ||
-      (log.row_id || '').toLowerCase().includes(query) ||
-      (log.profiles?.full_name && log.profiles.full_name.toLowerCase().includes(query));
+    const table_name = log.table_name || '';
+    const action = log.action || '';
+    const row_id = log.row_id || '';
+    const operator = log.profiles?.full_name || '';
 
-    const matchesAction = filterAction === 'all' || log.action === filterAction;
+    const matchesSearch =
+      table_name.toLowerCase().includes(query) ||
+      action.toLowerCase().includes(query) ||
+      row_id.toLowerCase().includes(query) ||
+      operator.toLowerCase().includes(query);
+
+    const matchesAction = filterAction === 'all' || action === filterAction;
 
     return matchesSearch && matchesAction;
   });
 
-  const getActionColor = (action: string) => {
+  const getActionColor = (action: string | null | undefined) => {
     switch (action) {
       case 'INSERT':
         return 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400';
@@ -76,7 +82,7 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
     }
   };
 
-  const getActionIcon = (action: string) => {
+  const getActionIcon = (action: string | null | undefined) => {
     switch (action) {
       case 'INSERT':
         return <PlusCircle className="h-3.5 w-3.5" />;
@@ -182,7 +188,7 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
 
                         {/* Table Name */}
                         <td className="p-4 font-bold text-white uppercase tracking-wide">
-                          {log.table_name}
+                          {log.table_name || 'UNKNOWN'}
                         </td>
 
                         {/* Operator */}
