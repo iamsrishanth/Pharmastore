@@ -201,7 +201,9 @@ alter table public.audit_logs enable row level security;
 -- ============================================
 -- AGGREGATION VIEW — stock is computed, never stored twice
 -- ============================================
-create or replace view public.product_stock_summary as
+create or replace view public.product_stock_summary
+with (security_invoker = true)
+as
 select
   p.id as product_id,
   p.name,
