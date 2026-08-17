@@ -385,7 +385,7 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
                     className={`flex w-full items-center justify-between px-4 py-3 text-left text-sm transition-colors ${
                       idx === activeSuggestionIdx 
                         ? 'bg-teal-50 text-teal-900' 
-                        : 'hover:bg-slate-50 text-slate-750'
+                        : 'hover:bg-slate-50 text-slate-700'
                     }`}
                   >
                     <div>

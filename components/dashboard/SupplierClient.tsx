@@ -255,7 +255,7 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Supplier Master</h1>
-          <p className="text-sm text-slate-555">Manage medicine manufacturers, distributors, and logistics partners</p>
+          <p className="text-sm text-slate-500">Manage medicine manufacturers, distributors, and logistics partners</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           {/* Hidden Import file input */}
@@ -330,7 +330,7 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
                   <tr key={sup.id} className="rx-table-row">
                     <td className="p-4 font-semibold text-slate-900">{sup.name}</td>
                     <td className="p-4 text-slate-700">{sup.contact_person || 'N/A'}</td>
-                    <td className="p-4 text-slate-750">
+                    <td className="p-4 text-slate-700">
                       <div>{sup.phone || 'N/A'}</div>
                       <div className="text-xs text-slate-500">{sup.email || ''}</div>
                     </td>
@@ -342,13 +342,13 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
                       <div className="flex justify-end gap-2">
                         <button
                           onClick={() => handleOpenEdit(sup)}
-                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-teal-650 transition"
+                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-teal-600 transition"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDelete(sup.id)}
-                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-rose-650 transition"
+                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-rose-600 transition"
                         >
                           <Trash2 className="h-4 w-4" />
                         </button>
@@ -382,7 +382,7 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
                 className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.name && (
-                <p className="mt-1 text-xs text-rose-655">{errors.name.message}</p>
+                <p className="mt-1 text-xs text-rose-600">{errors.name.message}</p>
               )}
             </div>
 
@@ -436,7 +436,7 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
                   className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
                 {errors.email && (
-                  <p className="mt-1 text-xs text-rose-655">{errors.email.message}</p>
+                  <p className="mt-1 text-xs text-rose-600">{errors.email.message}</p>
                 )}
               </div>
             </div>

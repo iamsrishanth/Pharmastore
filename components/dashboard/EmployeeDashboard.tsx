@@ -74,7 +74,7 @@ export default function EmployeeDashboard({
           </div>
           <h3 className="mt-4 text-base font-bold text-slate-900">POS Billing Counter</h3>
           <p className="mt-1 text-xs text-slate-500">Scan items, verify prescriptions, and print GST invoice PDFs</p>
-          <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-emerald-750">
+          <div className="mt-4 flex items-center gap-1 text-xs font-semibold text-emerald-700">
             Open Billing <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition duration-200" />
           </div>
         </Link>
@@ -84,7 +84,7 @@ export default function EmployeeDashboard({
           className="rx-card p-6 group block"
         >
           <div className="flex h-12 w-12 items-center justify-center rounded-xl rx-badge-info group-hover:scale-110 transition duration-200">
-            <Package className="h-6 w-6 text-sky-750" />
+            <Package className="h-6 w-6 text-sky-700" />
           </div>
           <h3 className="mt-4 text-base font-bold text-slate-900">Stock Master</h3>
           <p className="mt-1 text-xs text-slate-500">View batches, check stock levels, and report damage/write-offs</p>

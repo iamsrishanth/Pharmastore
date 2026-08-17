@@ -104,7 +104,7 @@ export default function AnalyticsClient({ data }: AnalyticsClientProps) {
         <div className="rx-card p-5">
           <div className="flex items-center justify-between text-slate-500">
             <span className="text-xs font-semibold uppercase tracking-wider">Catalog Valuation (MRP)</span>
-            <DollarSign className="h-4 w-4 text-sky-655" />
+            <DollarSign className="h-4 w-4 text-sky-600" />
           </div>
           <div className="mt-2 text-2xl font-bold text-slate-900 font-mono">
             ₹{data.stockValuation.mrp.toLocaleString('en-IN', { minimumFractionDigits: 2 })}

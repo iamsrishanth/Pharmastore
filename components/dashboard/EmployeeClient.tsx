@@ -271,7 +271,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                 className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.full_name && (
-                <p className="mt-1 text-xs text-rose-655">{errors.full_name.message}</p>
+                <p className="mt-1 text-xs text-rose-600">{errors.full_name.message}</p>
               )}
             </div>
 
@@ -287,7 +287,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                 className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.email && (
-                <p className="mt-1 text-xs text-rose-655">{errors.email.message}</p>
+                <p className="mt-1 text-xs text-rose-600">{errors.email.message}</p>
               )}
             </div>
 
@@ -303,7 +303,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                 className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.password && (
-                <p className="mt-1 text-xs text-rose-655">{errors.password.message}</p>
+                <p className="mt-1 text-xs text-rose-600">{errors.password.message}</p>
               )}
             </div>
 

@@ -507,7 +507,7 @@ export default function BatchClient({
                   ))}
                 </select>
                 {errors.product_id && (
-                  <p className="mt-1 text-xs text-rose-655">{errors.product_id.message}</p>
+                  <p className="mt-1 text-xs text-rose-600">{errors.product_id.message}</p>
                 )}
               </div>
             ) : (
@@ -533,7 +533,7 @@ export default function BatchClient({
                 className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.batch_number && (
-                <p className="mt-1 text-xs text-rose-655">{errors.batch_number.message}</p>
+                <p className="mt-1 text-xs text-rose-600">{errors.batch_number.message}</p>
               )}
             </div>
 
@@ -576,7 +576,7 @@ export default function BatchClient({
                 className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
               />
               {errors.expiry_date && (
-                <p className="mt-1 text-xs text-rose-655">{errors.expiry_date.message}</p>
+                <p className="mt-1 text-xs text-rose-600">{errors.expiry_date.message}</p>
               )}
             </div>
 
@@ -592,7 +592,7 @@ export default function BatchClient({
                   className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
                 />
                 {errors.quantity_received && (
-                  <p className="mt-1 text-xs text-rose-655">{errors.quantity_received.message}</p>
+                  <p className="mt-1 text-xs text-rose-600">{errors.quantity_received.message}</p>
                 )}
               </div>
             ) : (
@@ -619,7 +619,7 @@ export default function BatchClient({
                 className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
               />
               {errors.purchase_price && (
-                <p className="mt-1 text-xs text-rose-655">{errors.purchase_price.message}</p>
+                <p className="mt-1 text-xs text-rose-600">{errors.purchase_price.message}</p>
               )}
             </div>
 
@@ -635,7 +635,7 @@ export default function BatchClient({
                 placeholder="₹ 0.00"
                 className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
               />
-              {errors.mrp && <p className="mt-1 text-xs text-rose-655">{errors.mrp.message}</p>}
+              {errors.mrp && <p className="mt-1 text-xs text-rose-600">{errors.mrp.message}</p>}
             </div>
 
             <div>
@@ -651,7 +651,7 @@ export default function BatchClient({
                 className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
               />
               {errors.selling_price && (
-                <p className="mt-1 text-xs text-rose-655">{errors.selling_price.message}</p>
+                <p className="mt-1 text-xs text-rose-600">{errors.selling_price.message}</p>
               )}
             </div>
           </div>
