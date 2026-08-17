@@ -18,7 +18,7 @@ interface BranchItem {
 }
 
 // In-memory mock storage for local testing
-let mockBranches: BranchItem[] = [
+const mockBranches: BranchItem[] = [
   { id: 'br-1', name: 'Hyderabad Main Branch', code: 'HYD-01', location: 'Banjara Hills, Hyderabad', phone: '+91 98765 43210', is_active: true, created_at: new Date().toISOString() },
   { id: 'br-2', name: 'Secunderabad Outlet', code: 'SEC-02', location: 'MG Road, Secunderabad', phone: '+91 98765 43211', is_active: true, created_at: new Date().toISOString() },
   { id: 'br-3', name: 'Gachibowli Warehouse', code: 'GAC-WH', location: 'Financial District, Hyderabad', phone: '+91 98765 43212', is_active: true, created_at: new Date().toISOString() },

@@ -54,28 +54,41 @@ export async function updateSession(request: NextRequest) {
 
   // If user is authenticated, check their role and protect routes
   if (user) {
+    // Role-based route gating (defense in depth)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, is_active')
+      .eq('id', user.id)
+      .single();
+
+    if (!profile || !profile.is_active) {
+      if (!isAuthPage) {
+        url.pathname = '/login';
+        const redirectResponse = NextResponse.redirect(url);
+        // Sign out to clear session
+        await supabase.auth.signOut();
+        // Propagate cookies set by signOut
+        supabaseResponse.cookies.getAll().forEach((cookie) => {
+          redirectResponse.cookies.set(cookie.name, cookie.value, cookie);
+        });
+        return redirectResponse;
+      }
+      return supabaseResponse;
+    }
+
     // If they go to login page, redirect to home
     if (isAuthPage) {
       url.pathname = '/';
       return NextResponse.redirect(url);
     }
 
-    // Role-based route gating (defense in depth)
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    if (profile) {
-      if (url.pathname.startsWith('/admin') && profile.role !== 'admin') {
-        url.pathname = '/employee/dashboard';
-        return NextResponse.redirect(url);
-      }
-      if (url.pathname.startsWith('/employee') && profile.role !== 'employee') {
-        url.pathname = '/admin/dashboard';
-        return NextResponse.redirect(url);
-      }
+    if (url.pathname.startsWith('/admin') && profile.role !== 'admin') {
+      url.pathname = '/employee/dashboard';
+      return NextResponse.redirect(url);
+    }
+    if (url.pathname.startsWith('/employee') && profile.role !== 'employee') {
+      url.pathname = '/admin/dashboard';
+      return NextResponse.redirect(url);
     }
   }
 

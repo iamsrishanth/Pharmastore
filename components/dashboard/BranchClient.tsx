@@ -161,7 +161,7 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Branch Directory</h1>
-          <p className="text-sm text-slate-555">Manage retail pharmacy branches and warehouse locations</p>
+          <p className="text-sm text-slate-500">Manage retail pharmacy branches and warehouse locations</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -184,7 +184,7 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
           placeholder="Search branches by name, code, or location..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm text-slate-855 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+          className="block w-full rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
         />
       </div>
 
@@ -231,7 +231,7 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
                         {branch.location || 'N/A'}
                       </div>
                     </td>
-                    <td className="p-4 text-slate-750">
+                    <td className="p-4 text-slate-700">
                       <div className="flex items-center gap-1">
                         <Phone className="h-3.5 w-3.5 text-slate-400" />
                         {branch.phone || 'N/A'}
@@ -258,7 +258,7 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
                         <button
                           onClick={() => handleToggleActive(branch)}
                           title={branch.is_active ? 'Deactivate Branch' : 'Activate Branch'}
-                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-teal-650 transition cursor-pointer"
+                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-teal-600 transition cursor-pointer"
                         >
                           {branch.is_active ? (
                             <ToggleRight className="h-6 w-6 text-teal-600" />
@@ -269,7 +269,7 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
                         <button
                           onClick={() => handleOpenEdit(branch)}
                           title="Edit Details"
-                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-teal-650 transition cursor-pointer"
+                          className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-teal-600 transition cursor-pointer"
                         >
                           <Edit2 className="h-4 w-4" />
                         </button>
@@ -300,10 +300,10 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
                 required
                 {...register('name')}
                 placeholder="e.g. Hyderabad Main Branch"
-                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-855 placeholder-slate-400 outline-none focus:border-teal-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.name && (
-                <p className="mt-1 text-xs text-rose-655">{errors.name.message}</p>
+                <p className="mt-1 text-xs text-rose-600">{errors.name.message}</p>
               )}
             </div>
 
@@ -317,10 +317,10 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
                   required
                   {...register('code')}
                   placeholder="e.g. HYD-01"
-                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-855 placeholder-slate-400 outline-none focus:border-teal-500 font-mono"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500 font-mono"
                 />
                 {errors.code && (
-                  <p className="mt-1 text-xs text-rose-655">{errors.code.message}</p>
+                  <p className="mt-1 text-xs text-rose-600">{errors.code.message}</p>
                 )}
               </div>
 
@@ -332,7 +332,7 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
                   type="text"
                   {...register('phone')}
                   placeholder="e.g. +91 98765 43210"
-                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-855 placeholder-slate-400 outline-none focus:border-teal-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
               </div>
             </div>
@@ -345,7 +345,7 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
                 type="text"
                 {...register('location')}
                 placeholder="e.g. Jubilee Hills, Hyderabad"
-                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-855 placeholder-slate-400 outline-none focus:border-teal-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
               />
             </div>
           </div>

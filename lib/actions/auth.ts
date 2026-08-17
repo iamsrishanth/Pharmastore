@@ -83,6 +83,10 @@ export async function getCurrentUser() {
       .eq('id', user.id)
       .single();
 
+    if (profile && !profile.is_active) {
+      return null;
+    }
+
     return profile;
   } catch (error) {
     console.error('Error fetching current user:', error);
