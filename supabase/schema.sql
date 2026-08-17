@@ -568,3 +568,30 @@ create trigger audit_branches
   after insert or update or delete on public.branches
   for each row execute function public.audit_trigger_func();
 
+
+-- ============================================
+-- PRIVILEGE ESCALATION PREVENTION
+-- ============================================
+create or replace function public.check_profile_update()
+returns trigger as $$
+begin
+  -- Prevent non-admins from altering role or is_active fields
+  if not public.is_admin() then
+    if new.role <> old.role then
+      raise exception 'Only administrators can change profile roles.';
+    end if;
+    if new.is_active <> old.is_active then
+      raise exception 'Only administrators can change profile active status.';
+    end if;
+  end if;
+  return new;
+end;
+$$ language plpgsql security definer;
+
+drop trigger if exists trigger_check_profile_update on public.profiles;
+create trigger trigger_check_profile_update
+  before update on public.profiles
+  for each row
+  execute function public.check_profile_update();
+
+
