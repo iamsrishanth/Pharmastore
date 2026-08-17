@@ -1,8 +1,9 @@
 'use server';
 
-import { createClient, createPublicClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { branchSchema } from '@/lib/validation';
-import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
+import { getCurrentUser } from '@/lib/actions/auth';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 const isPlaceholder = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder-project');
 
@@ -30,7 +31,7 @@ async function fetchBranchesFromDb() {
       return mockBranches;
     }
 
-    const supabase = createPublicClient();
+    const supabase = await createClient(); // Authenticated client
     const { data, error } = await supabase
       .from('branches')
       .select('*')
@@ -44,20 +45,17 @@ async function fetchBranchesFromDb() {
   }
 }
 
-const getCachedBranches = unstable_cache(
-  async () => {
-    return fetchBranchesFromDb();
-  },
-  ['branches-list'],
-  { revalidate: 60, tags: ['branches'] }
-);
-
 export async function getBranches() {
-  return getCachedBranches();
+  return fetchBranchesFromDb();
 }
 
 export async function createBranch(prevState: any, data: any) {
   try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || currentUser.role !== 'admin') {
+      return { error: 'Unauthorized: Admin privileges required' };
+    }
+
     const parsed = branchSchema.safeParse(data);
     if (!parsed.success) {
       return { error: parsed.error.issues[0].message };
@@ -103,6 +101,11 @@ export async function createBranch(prevState: any, data: any) {
 
 export async function updateBranch(id: string, prevState: any, data: any) {
   try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || currentUser.role !== 'admin') {
+      return { error: 'Unauthorized: Admin privileges required' };
+    }
+
     const parsed = branchSchema.safeParse(data);
     if (!parsed.success) {
       return { error: parsed.error.issues[0].message };
@@ -154,6 +157,11 @@ export async function updateBranch(id: string, prevState: any, data: any) {
 
 export async function toggleBranchStatus(id: string, is_active: boolean) {
   try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || currentUser.role !== 'admin') {
+      return { error: 'Unauthorized: Admin privileges required' };
+    }
+
     if (isPlaceholder) {
       const idx = mockBranches.findIndex(b => b.id === id);
       if (idx === -1) {
@@ -180,4 +188,5 @@ export async function toggleBranchStatus(id: string, is_active: boolean) {
     return { error: error.message || 'An unexpected error occurred' };
   }
 }
+
 

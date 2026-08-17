@@ -27,6 +27,11 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
+  const isPlaceholder = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder-project');
+  if (isPlaceholder) {
+    return supabaseResponse;
+  }
+
   // Refresh the session token
   const {
     data: { user },
@@ -47,10 +52,31 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // If user is authenticated and goes to login page, redirect to home/dashboard router
-  if (user && isAuthPage) {
-    url.pathname = '/';
-    return NextResponse.redirect(url);
+  // If user is authenticated, check their role and protect routes
+  if (user) {
+    // If they go to login page, redirect to home
+    if (isAuthPage) {
+      url.pathname = '/';
+      return NextResponse.redirect(url);
+    }
+
+    // Role-based route gating (defense in depth)
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profile) {
+      if (url.pathname.startsWith('/admin') && profile.role !== 'admin') {
+        url.pathname = '/employee/dashboard';
+        return NextResponse.redirect(url);
+      }
+      if (url.pathname.startsWith('/employee') && profile.role !== 'employee') {
+        url.pathname = '/admin/dashboard';
+        return NextResponse.redirect(url);
+      }
+    }
   }
 
   return supabaseResponse;
