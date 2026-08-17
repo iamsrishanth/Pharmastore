@@ -71,3 +71,13 @@ export const stockAdjustmentSchema = z.object({
   quantity: z.coerce.number().int('Quantity must be an integer').refine((val) => val !== 0, 'Quantity cannot be zero'),
   reason: z.string().min(1, 'Please specify a reason'),
 });
+
+// Branch Schema
+export const branchSchema = z.object({
+  name: z.string().min(1, 'Branch name is required'),
+  code: z.string().min(1, 'Branch code is required').toUpperCase(),
+  location: z.string().optional().nullable().or(z.literal('')),
+  phone: z.string().optional().nullable().or(z.literal('')),
+  is_active: z.boolean().default(true),
+});
+

@@ -533,3 +533,38 @@ drop trigger if exists audit_profiles on public.profiles;
 create trigger audit_profiles
   after insert or update or delete on public.profiles
   for each row execute function public.audit_trigger_func();
+
+
+-- ============================================
+-- 11. BRANCHES
+-- ============================================
+create table if not exists public.branches (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  code text not null unique,
+  location text,
+  phone text,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+alter table public.branches enable row level security;
+
+-- Policies for branches
+create policy "Staff can view active branches"
+  on public.branches for select
+  using (
+    (public.is_active_staff() and is_active = true)
+    or public.is_admin()
+  );
+
+create policy "Admins can modify branches"
+  on public.branches for all
+  using (public.is_admin());
+
+-- Attach Audit trigger for branches
+drop trigger if exists audit_branches on public.branches;
+create trigger audit_branches
+  after insert or update or delete on public.branches
+  for each row execute function public.audit_trigger_func();
+

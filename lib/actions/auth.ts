@@ -59,6 +59,18 @@ export async function logout() {
 
 export async function getCurrentUser() {
   try {
+    const isPlaceholder = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder-project');
+    if (isPlaceholder) {
+      return {
+        id: 'mock-admin-id',
+        full_name: 'Administrator',
+        email: 'admin@pharmastore.com',
+        role: 'admin',
+        is_active: true,
+        created_at: new Date().toISOString()
+      };
+    }
+
     const supabase = await createClient();
     const {
       data: { user },
