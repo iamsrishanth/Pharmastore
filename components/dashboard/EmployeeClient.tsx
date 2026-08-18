@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { employeeSchema } from '@/lib/validation';
+import { hasAdminRole, isSuperAdmin, isManager } from '@/lib/roles';
 import { createEmployee, updateEmployee, toggleEmployeeStatus } from '@/lib/actions/employees';
 import Modal from '@/components/ui/Modal';
 import {
@@ -198,8 +199,12 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                     <td className="p-4">
                       <span
                         className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold tracking-wide border uppercase ${
-                          emp.role === 'admin'
+                          isSuperAdmin(emp)
+                            ? 'bg-rose-900/30 text-rose-300 border-rose-800'
+                            : hasAdminRole(emp)
                             ? 'rx-badge-success'
+                            : isManager(emp)
+                            ? 'bg-purple-900/30 text-purple-300 border-purple-800'
                             : 'rx-badge-info'
                         }`}
                       >

@@ -82,8 +82,28 @@ export async function createSale(input: CreateSaleInput) {
     let targetBranchId: string | null = null;
     if (currentUser.role === 'manager' || currentUser.role === 'employee') {
       targetBranchId = currentUser.branch_id || null;
+      if (!targetBranchId) {
+        return { error: 'Your account is not assigned to any branch.' };
+      }
     } else {
       targetBranchId = input.branchId || currentUser.branch_id || null;
+      if (!targetBranchId) {
+        return { error: 'Please select a valid branch for this transaction.' };
+      }
+
+      // Validate the branch exists and is active in the database
+      const { data: branchCheck } = await supabase
+        .from('branches')
+        .select('is_active')
+        .eq('id', targetBranchId)
+        .single();
+
+      if (!branchCheck) {
+        return { error: 'The selected branch does not exist.' };
+      }
+      if (!branchCheck.is_active) {
+        return { error: 'The selected branch is inactive and cannot accept new sales.' };
+      }
     }
 
     // 1. Resolve customer if details are provided

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { logout } from '@/lib/actions/auth';
+import { hasAdminRole } from '@/lib/roles';
 import {
   Activity,
   LayoutDashboard,
@@ -37,7 +38,7 @@ export default function Header({ profile }: HeaderProps) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const isAdmin = profile.role === 'admin';
+  const isAdmin = hasAdminRole(profile);
 
   const adminLinks = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },

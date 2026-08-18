@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { productSchema } from '@/lib/validation';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { getCurrentUser } from '@/lib/actions/auth';
+import { hasAdminRole } from '@/lib/roles';
 
 async function fetchProductsFromDb(searchQuery?: string) {
   try {
@@ -125,7 +126,7 @@ export async function updateProduct(id: string, prevState: any, data: any) {
 export async function deleteProduct(id: string) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (!currentUser || !hasAdminRole(currentUser)) {
       return { error: 'Unauthorized: Admin privileges required' };
     }
 

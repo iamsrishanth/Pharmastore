@@ -48,6 +48,9 @@ export async function createEmployee(prevState: any, data: any) {
     if (parsed.data.role === 'admin' && currentUser.role !== 'super_admin') {
       return { error: 'Unauthorized: Only super administrators can create store owner administrators' };
     }
+    if (parsed.data.role === 'manager' && currentUser.role !== 'super_admin' && currentUser.role !== 'admin') {
+      return { error: 'Unauthorized: Only administrators can create manager accounts' };
+    }
 
     // Branch check: Managers can only create staff for their own branch
     const targetBranchId = parsed.data.branch_id || null;
@@ -77,9 +80,8 @@ export async function createEmployee(prevState: any, data: any) {
       return { error: 'Failed to create auth user' };
     }
 
-    // 2. Update the profile fields to set phone, active state, and branch association.
-    const clientSupabase = await createClient();
-    const { error: profileError } = await clientSupabase
+    // 2. Update the profile fields to set phone, active state, and branch association using adminSupabase (secure write)
+    const { error: profileError } = await adminSupabase
       .from('profiles')
       .update({
         phone: parsed.data.phone || null,
@@ -114,10 +116,9 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
       return { error: parsed.error.issues[0].message };
     }
 
-    const adminSupabase = await createAdminClient();
-
-    // Fetch target user profile for role checks
-    const { data: targetProfile, error: targetProfileError } = await adminSupabase
+    // Secure lookup: Use RLS client to verify if the currentUser can even see the target profile
+    const clientSupabase = await createClient();
+    const { data: targetProfile, error: targetProfileError } = await clientSupabase
       .from('profiles')
       .select('*')
       .eq('id', id)
@@ -126,6 +127,8 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
     if (targetProfileError || !targetProfile) {
       return { error: 'Employee profile not found' };
     }
+
+    const adminSupabase = await createAdminClient();
 
     // Role boundaries checks:
     // Only super_admin can touch/manage super_admin
@@ -142,6 +145,15 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
     }
     if (parsed.data.role === 'admin' && currentUser.role !== 'super_admin') {
       return { error: 'Unauthorized: Only super administrators can assign store owner administrator role' };
+    }
+
+    // Manager constraints:
+    // Manager cannot manage a manager account
+    if (targetProfile.role === 'manager' && currentUser.role !== 'super_admin' && currentUser.role !== 'admin') {
+      return { error: 'Unauthorized: Only administrators can manage manager accounts' };
+    }
+    if (parsed.data.role === 'manager' && currentUser.role !== 'super_admin' && currentUser.role !== 'admin') {
+      return { error: 'Unauthorized: Only administrators can assign manager role' };
     }
 
     // Manager branch check
@@ -173,9 +185,8 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
       return { error: authError.message };
     }
 
-    // 2. Update Profile fields
-    const clientSupabase = await createClient();
-    const { error: profileError } = await clientSupabase
+    // 2. Update Profile fields using adminSupabase (secure write)
+    const { error: profileError } = await adminSupabase
       .from('profiles')
       .update({
         full_name: parsed.data.full_name,
@@ -247,11 +258,16 @@ export async function toggleEmployeeStatus(id: string, isActive: boolean) {
       return { error: 'Unauthorized: Only super administrators can manage store owner administrator accounts' };
     }
 
+    if (targetProfile.role === 'manager' && currentUser.role !== 'super_admin' && currentUser.role !== 'admin') {
+      return { error: 'Unauthorized: Only administrators can manage manager accounts' };
+    }
+
     if (currentUser.role === 'manager' && targetProfile.branch_id !== currentUser.branch_id) {
       return { error: 'Unauthorized: Managers can only toggle status of staff in their own branch' };
     }
 
-    const { error } = await supabase
+    const adminSupabase = await createAdminClient();
+    const { error } = await adminSupabase
       .from('profiles')
       .update({ is_active: isActive })
       .eq('id', id);

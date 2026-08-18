@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/actions/auth';
+import { hasAdminRole } from '@/lib/roles';
 import { stockAdjustmentSchema } from '@/lib/validation';
 import { revalidatePath } from 'next/cache';
 
@@ -57,8 +58,27 @@ export async function adjustStock(prevState: any, data: any) {
 
     const supabase = await createClient();
 
-    // Determine status based on role: admins approve immediately, employees queue for approval.
-    const status = currentUser.role === 'admin' ? 'approved' : 'pending';
+    // Fetch batch to get its branch_id and ensure it belongs to the user's branch if manager/employee
+    const { data: batch, error: batchError } = await supabase
+      .from('batches')
+      .select('branch_id')
+      .eq('id', parsed.data.batch_id)
+      .single();
+
+    if (batchError || !batch) {
+      return { error: 'Batch not found or unauthorized' };
+    }
+
+    const targetBranchId = batch.branch_id;
+    if (currentUser.role === 'manager' || currentUser.role === 'employee') {
+      if (targetBranchId !== currentUser.branch_id) {
+        return { error: 'Unauthorized: You can only adjust stock for batches in your own branch' };
+      }
+    }
+
+    // Determine status based on role: admins/super_admins approve immediately, employees/managers queue for approval.
+    const isApprovedImmediately = hasAdminRole(currentUser);
+    const status = isApprovedImmediately ? 'approved' : 'pending';
 
     const { error } = await supabase.from('stock_movements').insert([
       {
@@ -68,6 +88,7 @@ export async function adjustStock(prevState: any, data: any) {
         status: status,
         reason: parsed.data.reason,
         created_by: currentUser.id,
+        branch_id: targetBranchId,
       },
     ]);
 
@@ -87,7 +108,7 @@ export async function adjustStock(prevState: any, data: any) {
 export async function approveAdjustment(id: string) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (!currentUser || !hasAdminRole(currentUser)) {
       return { error: 'Unauthorized: Admin privileges required' };
     }
 
@@ -113,7 +134,7 @@ export async function approveAdjustment(id: string) {
 export async function rejectAdjustment(id: string) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (!currentUser || !hasAdminRole(currentUser)) {
       return { error: 'Unauthorized: Admin privileges required' };
     }
 

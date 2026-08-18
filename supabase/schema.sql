@@ -248,7 +248,7 @@ returns boolean as $$
     select 1 from public.profiles
     where id = auth.uid() and role = 'super_admin' and is_active = true
   );
-$$ language sql security definer stable;
+$$ language sql security definer stable set search_path = public;
 
 -- Reusable helper to check if current user is an active admin (includes super admin)
 create or replace function public.is_admin()
@@ -257,7 +257,7 @@ returns boolean as $$
     select 1 from public.profiles
     where id = auth.uid() and role in ('super_admin', 'admin') and is_active = true
   );
-$$ language sql security definer stable;
+$$ language sql security definer stable set search_path = public;
 
 -- Reusable helper to check if current user is active staff (super admin, admin, manager, or employee)
 create or replace function public.is_active_staff()
@@ -266,27 +266,21 @@ returns boolean as $$
     select 1 from public.profiles
     where id = auth.uid() and is_active = true
   );
-$$ language sql security definer stable;
+$$ language sql security definer stable set search_path = public;
 
 -- Reusable helper to check if current user has access to a specific branch
 create or replace function public.has_branch_access(record_branch_id uuid)
 returns boolean as $$
-declare
-  user_role text;
-  user_branch uuid;
-begin
-  select role, branch_id into user_role, user_branch
-  from public.profiles where id = auth.uid() and is_active = true;
-
-  -- Active Super Admins and Admins have global access
-  if user_role in ('super_admin', 'admin') then
-    return true;
-  end if;
-
-  -- Managers and Employees are restricted to their assigned branch
-  return user_branch = record_branch_id;
-end;
-$$ language plpgsql security definer stable;
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid()
+      and is_active = true
+      and (
+        role in ('super_admin', 'admin')
+        or branch_id = record_branch_id
+      )
+  );
+$$ language sql security definer stable set search_path = public;
 
 -- 1. Profiles Policies
 create policy "Staff can view active profiles in their branch or all if admin"
@@ -341,7 +335,8 @@ create policy "Staff can insert batches"
 
 create policy "Staff can update batches"
   on public.batches for update
-  using (public.is_active_staff() and public.has_branch_access(branch_id));
+  using (public.is_active_staff() and public.has_branch_access(branch_id))
+  with check (public.is_active_staff() and public.has_branch_access(branch_id));
 
 create policy "Only admins can delete batches"
   on public.batches for delete
@@ -433,6 +428,21 @@ create policy "Admins can view audit logs"
 
 
 -- ============================================
+-- 11. BRANCHES POLICIES
+-- ============================================
+create policy "Staff can view active branches"
+  on public.branches for select
+  using (
+    (public.is_active_staff() and is_active = true)
+    or public.is_admin()
+  );
+
+create policy "Admins can modify branches"
+  on public.branches for all
+  using (public.is_admin());
+
+
+-- ============================================
 -- DATABASE TRIGGERS
 -- ============================================
 
@@ -440,14 +450,15 @@ create policy "Admins can view audit logs"
 create or replace function public.handle_new_user()
 returns trigger as $$
 begin
-  insert into public.profiles (id, full_name, email, role, phone, is_active)
+  insert into public.profiles (id, full_name, email, role, phone, is_active, branch_id)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'full_name', 'New Employee'),
     new.email,
     'employee', -- Enforce safe default role, do not trust client metadata
     new.phone,
-    true
+    true,
+    null        -- Safe default null branch, must be assigned explicitly by authorized flow
   );
   return new;
 end;
@@ -517,7 +528,7 @@ returns trigger as $$
 begin
   -- Only log purchase movement if initial quantity_received > 0
   if new.quantity_received > 0 then
-    insert into public.stock_movements (batch_id, movement_type, quantity, reason, reference_type, reference_id, created_by)
+    insert into public.stock_movements (batch_id, movement_type, quantity, reason, reference_type, reference_id, created_by, branch_id)
     values (
       new.id, 
       'purchase', 
@@ -525,7 +536,8 @@ begin
       'Initial stock-in on batch creation', 
       'batch',
       new.id,
-      auth.uid()
+      auth.uid(),
+      new.branch_id
     );
   end if;
   return new;
@@ -593,8 +605,10 @@ drop trigger if exists audit_profiles on public.profiles;
 create trigger audit_profiles
   after insert or update or delete on public.profiles
   for each row execute function public.audit_trigger_func();
-
-
+drop trigger if exists audit_branches on public.branches;
+create trigger audit_branches
+  after insert or update or delete on public.branches
+  for each row execute function public.audit_trigger_func();
 
 
 -- ============================================
@@ -628,7 +642,8 @@ begin
         raise exception 'Only super administrators can manage super administrator roles and profiles.';
       end if;
     end if;
-    -- Prevent non-admins from altering role or is_active fields
+
+    -- Prevent non-admins from altering role, is_active, or branch_id fields
     if not public.is_admin() then
       if new.role is distinct from old.role then
         raise exception 'Only administrators can change profile roles.';
@@ -636,6 +651,14 @@ begin
       if new.is_active is distinct from old.is_active then
         raise exception 'Only administrators can change profile active status.';
       end if;
+      if new.branch_id is distinct from old.branch_id then
+        raise exception 'Only administrators can change branch assignments.';
+      end if;
+    end if;
+
+    -- Users cannot change their own role (even if they are admins, unless they are super_admins managing another account)
+    if new.id = auth.uid() and new.role is distinct from old.role then
+      raise exception 'Users are not permitted to change their own roles.';
     end if;
   end if;
   
@@ -654,40 +677,65 @@ create trigger trigger_check_profile_update
 -- 12. DATA MIGRATION & BACKFILLING (SAFE MODE)
 -- ============================================
 -- Safe backfilling plan for existing records:
--- 1. Check if an active default/HQ branch exists, or create one if none exists
 DO $$
 DECLARE
   default_branch_id uuid;
+  backfilled_profiles_count integer := 0;
+  backfilled_batches_count integer := 0;
+  backfilled_sales_count integer := 0;
+  backfilled_stock_movements_count integer := 0;
+  backfilled_purchase_orders_count integer := 0;
 BEGIN
-  SELECT id INTO default_branch_id FROM public.branches WHERE is_active = true LIMIT 1;
-  IF default_branch_id IS NULL THEN
-    INSERT INTO public.branches (name, code, location, is_active)
-    VALUES ('Headquarters', 'HQ', 'Primary Office', true)
-    RETURNING id INTO default_branch_id;
-  END IF;
+  -- 1. Idempotently create Headquarters branch if not exists
+  INSERT INTO public.branches (name, code, location, is_active)
+  VALUES ('Headquarters', 'HQ', 'Primary Office', true)
+  ON CONFLICT (code) DO NOTHING;
 
-  -- 2. Backfill existing profiles
-  UPDATE public.profiles
-  SET branch_id = default_branch_id
-  WHERE branch_id IS NULL;
+  -- 2. Fetch the default/HQ branch
+  SELECT id INTO default_branch_id FROM public.branches
+  ORDER BY (code = 'HQ') DESC, created_at ASC
+  LIMIT 1;
 
-  -- 3. Backfill existing batches
-  UPDATE public.batches
-  SET branch_id = default_branch_id
-  WHERE branch_id IS NULL;
+  -- 3. Backfill profiles
+  WITH updated AS (
+    UPDATE public.profiles
+    SET branch_id = default_branch_id
+    WHERE branch_id IS NULL
+    RETURNING 1
+  ) SELECT count(*) INTO backfilled_profiles_count FROM updated;
 
-  -- 4. Backfill existing sales
-  UPDATE public.sales
-  SET branch_id = default_branch_id
-  WHERE branch_id IS NULL;
+  -- 4. Backfill batches
+  WITH updated AS (
+    UPDATE public.batches
+    SET branch_id = default_branch_id
+    WHERE branch_id IS NULL
+    RETURNING 1
+  ) SELECT count(*) INTO backfilled_batches_count FROM updated;
 
-  -- 5. Backfill existing stock movements
-  UPDATE public.stock_movements
-  SET branch_id = default_branch_id
-  WHERE branch_id IS NULL;
+  -- 5. Backfill sales
+  WITH updated AS (
+    UPDATE public.sales
+    SET branch_id = default_branch_id
+    WHERE branch_id IS NULL
+    RETURNING 1
+  ) SELECT count(*) INTO backfilled_sales_count FROM updated;
 
-  -- 6. Backfill existing purchase orders
-  UPDATE public.purchase_orders
-  SET branch_id = default_branch_id
-  WHERE branch_id IS NULL;
+  -- 6. Backfill stock movements
+  WITH updated AS (
+    UPDATE public.stock_movements
+    SET branch_id = default_branch_id
+    WHERE branch_id IS NULL
+    RETURNING 1
+  ) SELECT count(*) INTO backfilled_stock_movements_count FROM updated;
+
+  -- 7. Backfill purchase orders
+  WITH updated AS (
+    UPDATE public.purchase_orders
+    SET branch_id = default_branch_id
+    WHERE branch_id IS NULL
+    RETURNING 1
+  ) SELECT count(*) INTO backfilled_purchase_orders_count FROM updated;
+
+  RAISE NOTICE 'Backfill complete. Profiles: %, Batches: %, Sales: %, Stock Movements: %, Purchase Orders: %.',
+    backfilled_profiles_count, backfilled_batches_count, backfilled_sales_count, backfilled_stock_movements_count, backfilled_purchase_orders_count;
 END $$;

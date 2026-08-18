@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { batchSchema } from '@/lib/validation';
 import { revalidatePath } from 'next/cache';
 import { getCurrentUser } from '@/lib/actions/auth';
+import { hasAdminRole } from '@/lib/roles';
 
 export async function getBatches(productId?: string) {
   try {
@@ -38,14 +39,34 @@ export async function createBatch(prevState: any, data: any) {
       return { error: 'Unauthorized: Session not found' };
     }
 
+    const supabase = await createClient();
+
     let targetBranchId: string | null = null;
     if (currentUser.role === 'manager' || currentUser.role === 'employee') {
       targetBranchId = currentUser.branch_id || null;
+      if (!targetBranchId) {
+        return { error: 'Your account is not assigned to any branch.' };
+      }
     } else {
       targetBranchId = parsed.data.branch_id || currentUser.branch_id || null;
-    }
+      if (!targetBranchId) {
+        return { error: 'Please select a valid branch for this batch.' };
+      }
 
-    const supabase = await createClient();
+      // Validate the branch exists and is active
+      const { data: branchCheck } = await supabase
+        .from('branches')
+        .select('is_active')
+        .eq('id', targetBranchId)
+        .single();
+
+      if (!branchCheck) {
+        return { error: 'The selected branch does not exist.' };
+      }
+      if (!branchCheck.is_active) {
+        return { error: 'The selected branch is inactive and cannot accept new batches.' };
+      }
+    }
 
     // Ensure quantity_available starts at 0.
     // The DB trigger trigger_auto_purchase_movement will create a purchase movement,
@@ -119,7 +140,7 @@ export async function updateBatch(id: string, prevState: any, data: any) {
 export async function deleteBatch(id: string) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser || (currentUser.role !== 'super_admin' && currentUser.role !== 'admin')) {
+    if (!currentUser || !hasAdminRole(currentUser)) {
       return { error: 'Unauthorized: Admin privileges required' };
     }
 
