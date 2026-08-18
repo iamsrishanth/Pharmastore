@@ -385,7 +385,7 @@ begin
     new.id,
     coalesce(new.raw_user_meta_data->>'full_name', 'New Employee'),
     new.email,
-    coalesce(new.raw_user_meta_data->>'role', 'employee'),
+    'employee', -- Enforce safe default role, do not trust client metadata
     new.phone,
     true
   );
@@ -574,13 +574,20 @@ create trigger audit_branches
 -- ============================================
 create or replace function public.check_profile_update()
 returns trigger as $$
+declare
+  admin_exists boolean;
 begin
+  -- Bootstrap escape hatch: check if any active admin profile exists in the system
+  select exists (
+    select 1 from public.profiles where role = 'admin' and is_active = true
+  ) into admin_exists;
+
   -- Prevent non-admins from altering role or is_active fields
-  if not public.is_admin() then
-    if new.role <> old.role then
+  if admin_exists and not public.is_admin() then
+    if new.role is distinct from old.role then
       raise exception 'Only administrators can change profile roles.';
     end if;
-    if new.is_active <> old.is_active then
+    if new.is_active is distinct from old.is_active then
       raise exception 'Only administrators can change profile active status.';
     end if;
   end if;

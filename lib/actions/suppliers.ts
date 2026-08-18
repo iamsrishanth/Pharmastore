@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { supplierSchema } from '@/lib/validation';
 import { revalidatePath, revalidateTag } from 'next/cache';
+import { getCurrentUser } from '@/lib/actions/auth';
 
 async function fetchSuppliersFromDb() {
   try {
@@ -26,6 +27,11 @@ export async function getSuppliers() {
 
 export async function createSupplier(prevState: any, data: any) {
   try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || currentUser.role !== 'admin') {
+      return { error: 'Unauthorized: Admin privileges required' };
+    }
+
     const parsed = supplierSchema.safeParse(data);
     if (!parsed.success) {
       return { error: parsed.error.issues[0].message };
@@ -48,6 +54,11 @@ export async function createSupplier(prevState: any, data: any) {
 
 export async function updateSupplier(id: string, prevState: any, data: any) {
   try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || currentUser.role !== 'admin') {
+      return { error: 'Unauthorized: Admin privileges required' };
+    }
+
     const parsed = supplierSchema.safeParse(data);
     if (!parsed.success) {
       return { error: parsed.error.issues[0].message };
@@ -73,6 +84,11 @@ export async function updateSupplier(id: string, prevState: any, data: any) {
 
 export async function deleteSupplier(id: string) {
   try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || currentUser.role !== 'admin') {
+      return { error: 'Unauthorized: Admin privileges required' };
+    }
+
     const supabase = await createClient();
     const { error } = await supabase.from('suppliers').delete().eq('id', id);
 
