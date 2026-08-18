@@ -154,7 +154,6 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
         return { error: 'Unauthorized: Managers cannot alter branch assignments' };
       }
     }
-
     // Fetch current auth user details for rollback support
     const { data: { user: originalUser }, error: fetchUserError } = await adminSupabase.auth.admin.getUserById(id);
     if (fetchUserError || !originalUser) {
@@ -205,7 +204,6 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
       });
       if (linkError) {
         console.error('Failed to generate recovery link during password rollback:', linkError);
-      } else if (linkData?.properties?.action_link) {
         console.log(JSON.stringify({
           event: 'recovery_link_generated',
           email: originalUser.email,

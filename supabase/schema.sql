@@ -597,7 +597,6 @@ create trigger audit_profiles
 
 
 
-
 -- ============================================
 -- PRIVILEGE ESCALATION PREVENTION
 -- ============================================
@@ -629,7 +628,6 @@ begin
         raise exception 'Only super administrators can manage super administrator roles and profiles.';
       end if;
     end if;
-
     -- Prevent non-admins from altering role or is_active fields
     if not public.is_admin() then
       if new.role is distinct from old.role then
@@ -693,6 +691,3 @@ BEGIN
   SET branch_id = default_branch_id
   WHERE branch_id IS NULL;
 END $$;
-
-
-
