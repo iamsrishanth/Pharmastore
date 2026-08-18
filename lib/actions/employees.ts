@@ -102,6 +102,12 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
 
     const adminSupabase = await createAdminClient();
 
+    // Fetch current auth user details for rollback support
+    const { data: { user: originalUser }, error: fetchUserError } = await adminSupabase.auth.admin.getUserById(id);
+    if (fetchUserError || !originalUser) {
+      return { error: fetchUserError?.message || 'Employee auth record not found' };
+    }
+
     // 1. Update Auth settings (email/password if provided)
     const updateData: { email: string; password?: string } = {
       email: parsed.data.email,
@@ -129,6 +135,14 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
       .eq('id', id);
 
     if (profileError) {
+      console.error('Profile update failed, rolling back Auth user updates:', profileError);
+      const rollbackData = {
+        email: originalUser.email!,
+      };
+      const { error: rollbackError } = await adminSupabase.auth.admin.updateUserById(id, rollbackData);
+      if (rollbackError) {
+        console.error('Critical: Failed to roll back Auth user updates:', rollbackError);
+      }
       return { error: profileError.message };
     }
 

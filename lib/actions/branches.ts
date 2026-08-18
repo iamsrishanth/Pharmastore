@@ -5,7 +5,7 @@ import { branchSchema } from '@/lib/validation';
 import { getCurrentUser } from '@/lib/actions/auth';
 import { revalidatePath, revalidateTag } from 'next/cache';
 
-const isPlaceholder = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder-project');
+const isPlaceholder = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder-project') && process.env.NODE_ENV !== 'production';
 
 interface BranchItem {
   id: string;

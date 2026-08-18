@@ -59,7 +59,7 @@ export async function logout() {
 
 export async function getCurrentUser() {
   try {
-    const isPlaceholder = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder-project');
+    const isPlaceholder = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder-project') && process.env.NODE_ENV !== 'production';
     if (isPlaceholder) {
       return {
         id: 'mock-admin-id',
