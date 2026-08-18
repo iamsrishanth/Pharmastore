@@ -6,15 +6,31 @@
 create extension if not exists "uuid-ossp";
 
 -- ============================================
+-- 0. BRANCHES
+-- ============================================
+create table if not exists public.branches (
+  id uuid primary key default gen_random_uuid(),
+  name text not null,
+  code text not null unique,
+  location text,
+  phone text,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+alter table public.branches enable row level security;
+
+-- ============================================
 -- 1. PROFILES (extends Supabase auth.users)
 -- ============================================
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
   full_name text not null,
   email text,
-  role text not null check (role in ('admin', 'employee')),
+  role text not null check (role in ('super_admin', 'admin', 'manager', 'employee')),
   phone text,
   is_active boolean not null default true,
+  branch_id uuid references public.branches(id) on delete set null,
   created_at timestamptz not null default now()
 );
 
@@ -75,6 +91,7 @@ create table if not exists public.batches (
   purchase_price numeric not null CHECK (purchase_price >= 0),
   mrp numeric not null CHECK (mrp >= 0),
   selling_price numeric not null CHECK (selling_price >= 0),
+  branch_id uuid references public.branches(id) on delete set null,
   created_at timestamptz not null default now()
 );
 
@@ -91,6 +108,7 @@ create table if not exists public.purchase_orders (
   order_date date not null default current_date,
   expected_date date,
   created_by uuid references public.profiles(id) on delete set null,
+  branch_id uuid references public.branches(id) on delete set null,
   created_at timestamptz not null default now()
 );
 
@@ -121,6 +139,7 @@ create table if not exists public.stock_movements (
   reference_type text, -- e.g. 'sale_item', 'po_item', 'writeoff_request'
   reference_id uuid,
   created_by uuid references public.profiles(id) on delete set null,
+  branch_id uuid references public.branches(id) on delete set null,
   created_at timestamptz not null default now()
 );
 
@@ -152,6 +171,7 @@ create table if not exists public.sales (
   total numeric not null check (total >= 0),
   payment_mode text check (payment_mode in ('cash','card','upi')),
   created_by uuid references public.profiles(id) on delete set null,
+  branch_id uuid references public.branches(id) on delete set null,
   created_at timestamptz not null default now()
 );
 
@@ -221,16 +241,25 @@ group by p.id, p.name, p.generic_name;
 -- RLS HELPER FUNCTIONS & POLICIES
 -- ============================================
 
--- Reusable helper to check if current user is an active admin
+-- Reusable helper to check if current user is an active super admin
+create or replace function public.is_super_admin()
+returns boolean as $$
+  select exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role = 'super_admin' and is_active = true
+  );
+$$ language sql security definer stable;
+
+-- Reusable helper to check if current user is an active admin (includes super admin)
 create or replace function public.is_admin()
 returns boolean as $$
   select exists (
     select 1 from public.profiles
-    where id = auth.uid() and role = 'admin' and is_active = true
+    where id = auth.uid() and role in ('super_admin', 'admin') and is_active = true
   );
 $$ language sql security definer stable;
 
--- Reusable helper to check if current user is active staff (admin or employee)
+-- Reusable helper to check if current user is active staff (super admin, admin, manager, or employee)
 create or replace function public.is_active_staff()
 returns boolean as $$
   select exists (
@@ -239,10 +268,33 @@ returns boolean as $$
   );
 $$ language sql security definer stable;
 
+-- Reusable helper to check if current user has access to a specific branch
+create or replace function public.has_branch_access(record_branch_id uuid)
+returns boolean as $$
+declare
+  user_role text;
+  user_branch uuid;
+begin
+  select role, branch_id into user_role, user_branch
+  from public.profiles where id = auth.uid() and is_active = true;
+
+  -- Active Super Admins and Admins have global access
+  if user_role in ('super_admin', 'admin') then
+    return true;
+  end if;
+
+  -- Managers and Employees are restricted to their assigned branch
+  return user_branch = record_branch_id;
+end;
+$$ language plpgsql security definer stable;
+
 -- 1. Profiles Policies
-create policy "Staff can view all active profiles"
+create policy "Staff can view active profiles in their branch or all if admin"
   on public.profiles for select
-  using (public.is_active_staff());
+  using (
+    public.is_admin() or 
+    (public.is_active_staff() and branch_id = (select branch_id from public.profiles where id = auth.uid()))
+  );
 
 create policy "Admins can modify profiles"
   on public.profiles for all
@@ -281,53 +333,57 @@ create policy "Only admins can delete products"
 -- 4. Batches Policies
 create policy "Staff can view batches"
   on public.batches for select
-  using (public.is_active_staff());
+  using (public.is_active_staff() and public.has_branch_access(branch_id));
 
 create policy "Staff can insert batches"
   on public.batches for insert
-  with check (public.is_active_staff());
+  with check (public.is_active_staff() and public.has_branch_access(branch_id));
 
 create policy "Staff can update batches"
   on public.batches for update
-  using (public.is_active_staff());
+  using (public.is_active_staff() and public.has_branch_access(branch_id));
 
 create policy "Only admins can delete batches"
   on public.batches for delete
-  using (public.is_admin());
+  using (public.is_admin() and public.has_branch_access(branch_id));
 
 -- 5. Purchase Orders Policies
 create policy "Staff can view purchase orders"
   on public.purchase_orders for select
-  using (public.is_active_staff());
+  using (public.is_active_staff() and public.has_branch_access(branch_id));
 
-create policy "Staff can create/update purchase orders"
+create policy "Staff can create purchase orders"
   on public.purchase_orders for insert
-  with check (public.is_active_staff());
+  with check (public.is_active_staff() and public.has_branch_access(branch_id));
 
 create policy "Staff can update purchase orders"
   on public.purchase_orders for update
-  using (public.is_active_staff());
+  using (public.is_active_staff() and public.has_branch_access(branch_id));
 
 create policy "Only admins can delete purchase orders"
   on public.purchase_orders for delete
-  using (public.is_admin());
+  using (public.is_admin() and public.has_branch_access(branch_id));
 
 create policy "Staff can view purchase order items"
   on public.purchase_order_items for select
-  using (public.is_active_staff());
+  using (public.is_active_staff() and exists (
+    select 1 from public.purchase_orders where id = po_id and public.has_branch_access(branch_id)
+  ));
 
 create policy "Staff can manage purchase order items"
   on public.purchase_order_items for all
-  using (public.is_active_staff());
+  using (public.is_active_staff() and exists (
+    select 1 from public.purchase_orders where id = po_id and public.has_branch_access(branch_id)
+  ));
 
 -- 6. Stock Movements Policies
 create policy "Staff can view stock movements"
   on public.stock_movements for select
-  using (public.is_active_staff());
+  using (public.is_active_staff() and public.has_branch_access(branch_id));
 
 create policy "Staff can insert stock movements"
   on public.stock_movements for insert
-  with check (public.is_active_staff());
+  with check (public.is_active_staff() and public.has_branch_access(branch_id));
 
 -- 7. Customers Policies
 create policy "Staff can view/manage customers"
@@ -337,19 +393,23 @@ create policy "Staff can view/manage customers"
 -- 8. Sales Policies
 create policy "Staff can view sales"
   on public.sales for select
-  using (public.is_active_staff());
+  using (public.is_active_staff() and public.has_branch_access(branch_id));
 
 create policy "Staff can insert sales"
   on public.sales for insert
-  with check (public.is_active_staff());
+  with check (public.is_active_staff() and public.has_branch_access(branch_id));
 
 create policy "Staff can view sale items"
   on public.sale_items for select
-  using (public.is_active_staff());
+  using (public.is_active_staff() and exists (
+    select 1 from public.sales where id = sale_id and public.has_branch_access(branch_id)
+  ));
 
 create policy "Staff can insert sale items"
   on public.sale_items for insert
-  with check (public.is_active_staff());
+  with check (public.is_active_staff() and exists (
+    select 1 from public.sales where id = sale_id and public.has_branch_access(branch_id)
+  ));
 
 -- 9. Notifications Policies
 create policy "Staff can view notifications"
@@ -535,38 +595,7 @@ create trigger audit_profiles
   for each row execute function public.audit_trigger_func();
 
 
--- ============================================
--- 11. BRANCHES
--- ============================================
-create table if not exists public.branches (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  code text not null unique,
-  location text,
-  phone text,
-  is_active boolean not null default true,
-  created_at timestamptz not null default now()
-);
 
-alter table public.branches enable row level security;
-
--- Policies for branches
-create policy "Staff can view active branches"
-  on public.branches for select
-  using (
-    (public.is_active_staff() and is_active = true)
-    or public.is_admin()
-  );
-
-create policy "Admins can modify branches"
-  on public.branches for all
-  using (public.is_admin());
-
--- Attach Audit trigger for branches
-drop trigger if exists audit_branches on public.branches;
-create trigger audit_branches
-  after insert or update or delete on public.branches
-  for each row execute function public.audit_trigger_func();
 
 
 -- ============================================
@@ -594,6 +623,13 @@ begin
     insert into public.audit_logs (user_id, action, entity, entity_id, new_value)
     values (new.id, 'BOOTSTRAP', 'profiles', new.id, jsonb_build_object('role', new.role, 'is_active', new.is_active, 'bootstrap', true));
   else
+    -- Check if target profile is a super_admin or is being set to super_admin
+    if old.role = 'super_admin' or new.role = 'super_admin' then
+      if not public.is_super_admin() then
+        raise exception 'Only super administrators can manage super administrator roles and profiles.';
+      end if;
+    end if;
+
     -- Prevent non-admins from altering role or is_active fields
     if not public.is_admin() then
       if new.role is distinct from old.role then

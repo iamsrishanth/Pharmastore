@@ -28,8 +28,8 @@ export async function getEmployees() {
 export async function createEmployee(prevState: any, data: any) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.role !== 'admin') {
-      return { error: 'Unauthorized: Admin privileges required' };
+    if (!currentUser || (currentUser.role !== 'super_admin' && currentUser.role !== 'admin' && currentUser.role !== 'manager')) {
+      return { error: 'Unauthorized: Staff management privileges required' };
     }
 
     const parsed = employeeSchema.safeParse(data);
@@ -39,6 +39,20 @@ export async function createEmployee(prevState: any, data: any) {
 
     if (!parsed.data.password) {
       return { error: 'Password is required when creating a new employee' };
+    }
+
+    // Role level check: Only super_admin can create super_admin or admin
+    if (parsed.data.role === 'super_admin' && currentUser.role !== 'super_admin') {
+      return { error: 'Unauthorized: Only super administrators can create super administrators' };
+    }
+    if (parsed.data.role === 'admin' && currentUser.role !== 'super_admin') {
+      return { error: 'Unauthorized: Only super administrators can create store owner administrators' };
+    }
+
+    // Branch check: Managers can only create staff for their own branch
+    const targetBranchId = parsed.data.branch_id || null;
+    if (currentUser.role === 'manager' && targetBranchId !== currentUser.branch_id) {
+      return { error: 'Unauthorized: Managers can only create staff for their own branch' };
     }
 
     const adminSupabase = await createAdminClient();
@@ -63,14 +77,14 @@ export async function createEmployee(prevState: any, data: any) {
       return { error: 'Failed to create auth user' };
     }
 
-    // 2. The database trigger (on_auth_user_created) automatically inserts into profiles.
-    // However, let's update it to ensure phone and active state are set exactly as requested.
+    // 2. Update the profile fields to set phone, active state, and branch association.
     const clientSupabase = await createClient();
     const { error: profileError } = await clientSupabase
       .from('profiles')
       .update({
         phone: parsed.data.phone || null,
         is_active: parsed.data.is_active,
+        branch_id: targetBranchId,
       })
       .eq('id', userId);
 
@@ -84,15 +98,15 @@ export async function createEmployee(prevState: any, data: any) {
     revalidatePath('/admin/employees');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
 
 export async function updateEmployee(id: string, prevState: any, data: any) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.role !== 'admin') {
-      return { error: 'Unauthorized: Admin privileges required' };
+    if (!currentUser || (currentUser.role !== 'super_admin' && currentUser.role !== 'admin' && currentUser.role !== 'manager')) {
+      return { error: 'Unauthorized: Staff management privileges required' };
     }
 
     const parsed = employeeSchema.safeParse(data);
@@ -101,6 +115,45 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
     }
 
     const adminSupabase = await createAdminClient();
+
+    // Fetch target user profile for role checks
+    const { data: targetProfile, error: targetProfileError } = await adminSupabase
+      .from('profiles')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (targetProfileError || !targetProfile) {
+      return { error: 'Employee profile not found' };
+    }
+
+    // Role boundaries checks:
+    // Only super_admin can touch/manage super_admin
+    if (targetProfile.role === 'super_admin' && currentUser.role !== 'super_admin') {
+      return { error: 'Unauthorized: Only super administrators can manage super administrator accounts' };
+    }
+    if (parsed.data.role === 'super_admin' && currentUser.role !== 'super_admin') {
+      return { error: 'Unauthorized: Only super administrators can assign super administrator role' };
+    }
+
+    // Only super_admin can touch/manage admin
+    if (targetProfile.role === 'admin' && currentUser.role !== 'super_admin') {
+      return { error: 'Unauthorized: Only super administrators can manage store owner administrator accounts' };
+    }
+    if (parsed.data.role === 'admin' && currentUser.role !== 'super_admin') {
+      return { error: 'Unauthorized: Only super administrators can assign store owner administrator role' };
+    }
+
+    // Manager branch check
+    const targetBranchId = parsed.data.branch_id || null;
+    if (currentUser.role === 'manager') {
+      if (targetProfile.branch_id !== currentUser.branch_id) {
+        return { error: 'Unauthorized: Managers can only manage staff for their own branch' };
+      }
+      if (targetBranchId !== currentUser.branch_id) {
+        return { error: 'Unauthorized: Managers cannot alter branch assignments' };
+      }
+    }
 
     // Fetch current auth user details for rollback support
     const { data: { user: originalUser }, error: fetchUserError } = await adminSupabase.auth.admin.getUserById(id);
@@ -131,6 +184,7 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
         role: parsed.data.role,
         phone: parsed.data.phone || null,
         is_active: parsed.data.is_active,
+        branch_id: targetBranchId,
       })
       .eq('id', id);
 
@@ -166,29 +220,52 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
     revalidatePath('/admin/employees');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
 
 export async function toggleEmployeeStatus(id: string, isActive: boolean) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.role !== 'admin') {
-      return { error: 'Unauthorized: Admin privileges required' };
+    if (!currentUser || (currentUser.role !== 'super_admin' && currentUser.role !== 'admin' && currentUser.role !== 'manager')) {
+      return { error: 'Unauthorized: Staff management privileges required' };
     }
 
     const supabase = await createClient();
+    const { data: targetProfile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', id)
+      .single();
+
+    if (!targetProfile) {
+      return { error: 'Employee not found' };
+    }
+
+    if (targetProfile.role === 'super_admin' && currentUser.role !== 'super_admin') {
+      return { error: 'Unauthorized: Only super administrators can manage super administrator accounts' };
+    }
+    if (targetProfile.role === 'admin' && currentUser.role !== 'super_admin') {
+      return { error: 'Unauthorized: Only super administrators can manage store owner administrator accounts' };
+    }
+
+    if (currentUser.role === 'manager' && targetProfile.branch_id !== currentUser.branch_id) {
+      return { error: 'Unauthorized: Managers can only toggle status of staff in their own branch' };
+    }
+
     const { error } = await supabase
       .from('profiles')
       .update({ is_active: isActive })
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      return { error: 'Failed to update employee status' };
+    }
 
     revalidateTag('employees', 'max');
     revalidatePath('/admin/employees');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }

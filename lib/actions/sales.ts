@@ -19,6 +19,7 @@ interface CreateSaleInput {
   discount: number;
   prescriptionRef?: string; // Reference number or description
   prescriptionUrl?: string; // Supabase Storage URL
+  branchId?: string;
 }
 
 export async function getSales() {
@@ -77,6 +78,13 @@ export async function createSale(input: CreateSaleInput) {
     }
 
     const supabase = await createClient();
+
+    let targetBranchId: string | null = null;
+    if (currentUser.role === 'manager' || currentUser.role === 'employee') {
+      targetBranchId = currentUser.branch_id || null;
+    } else {
+      targetBranchId = input.branchId || currentUser.branch_id || null;
+    }
 
     // 1. Resolve customer if details are provided
     let customerId: string | null = null;
@@ -206,6 +214,7 @@ export async function createSale(input: CreateSaleInput) {
           total: finalTotal,
           payment_mode: input.paymentMode,
           created_by: currentUser.id,
+          branch_id: targetBranchId,
         },
       ])
       .select('id')
@@ -244,6 +253,7 @@ export async function createSale(input: CreateSaleInput) {
           reference_type: 'sale',
           reference_id: sale.id,
           created_by: currentUser.id,
+          branch_id: targetBranchId,
         },
       ]);
 

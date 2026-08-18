@@ -29,6 +29,7 @@ export const batchSchema = z.object({
   purchase_price: z.coerce.number().nonnegative('Purchase price must be >= 0'),
   mrp: z.coerce.number().nonnegative('MRP must be >= 0'),
   selling_price: z.coerce.number().nonnegative('Selling price must be >= 0'),
+  branch_id: z.string().uuid('Please select a valid branch').optional().nullable().or(z.literal('')),
 });
 
 // Supplier Schema
@@ -46,9 +47,10 @@ export const employeeSchema = z.object({
   full_name: z.string().min(1, 'Full name is required'),
   email: z.string().email('Please enter a valid email'),
   password: z.string().min(6, 'Password must be at least 6 characters').optional().or(z.literal('')),
-  role: z.enum(['admin', 'employee']),
+  role: z.enum(['super_admin', 'admin', 'manager', 'employee']),
   phone: z.string().optional().nullable().or(z.literal('')),
   is_active: z.boolean(),
+  branch_id: z.string().uuid('Please select a valid branch').optional().nullable().or(z.literal('')),
 });
 
 // Purchase Order Schema
