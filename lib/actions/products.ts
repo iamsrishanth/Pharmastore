@@ -35,7 +35,7 @@ export async function createProduct(prevState: any, data: any) {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
-      return { error: 'Unauthorized: Staff privileges required' };
+      return { error: 'Unauthorized: Login required' };
     }
 
     const parsed = productSchema.safeParse(data);
@@ -43,14 +43,27 @@ export async function createProduct(prevState: any, data: any) {
       return { error: parsed.error.issues[0].message };
     }
 
+    const productData = {
+      ...parsed.data,
+      generic_name: parsed.data.generic_name || null,
+      manufacturer: parsed.data.manufacturer || null,
+      category: parsed.data.category || null,
+      composition: parsed.data.composition || null,
+      strength: parsed.data.strength || null,
+      pack_size: parsed.data.pack_size || null,
+      unit: parsed.data.unit || null,
+      hsn_code: parsed.data.hsn_code || null,
+      barcode: parsed.data.barcode || null,
+    };
+
     const supabase = await createClient();
-    const { error } = await supabase.from('products').insert([parsed.data]);
+    const { error } = await supabase.from('products').insert([productData]);
 
     if (error) {
       if (error.code === '23505') {
         return { error: 'A product with this barcode already exists' };
       }
-      return { error: error.message };
+      return { error: 'Failed to create product' };
     }
 
     revalidateTag('products', 'max');
@@ -58,7 +71,7 @@ export async function createProduct(prevState: any, data: any) {
     revalidatePath('/employee/stock');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
 
@@ -66,7 +79,7 @@ export async function updateProduct(id: string, prevState: any, data: any) {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
-      return { error: 'Unauthorized: Staff privileges required' };
+      return { error: 'Unauthorized: Login required' };
     }
 
     const parsed = productSchema.safeParse(data);
@@ -74,17 +87,30 @@ export async function updateProduct(id: string, prevState: any, data: any) {
       return { error: parsed.error.issues[0].message };
     }
 
+    const productData = {
+      ...parsed.data,
+      generic_name: parsed.data.generic_name || null,
+      manufacturer: parsed.data.manufacturer || null,
+      category: parsed.data.category || null,
+      composition: parsed.data.composition || null,
+      strength: parsed.data.strength || null,
+      pack_size: parsed.data.pack_size || null,
+      unit: parsed.data.unit || null,
+      hsn_code: parsed.data.hsn_code || null,
+      barcode: parsed.data.barcode || null,
+    };
+
     const supabase = await createClient();
     const { error } = await supabase
       .from('products')
-      .update(parsed.data)
+      .update(productData)
       .eq('id', id);
 
     if (error) {
       if (error.code === '23505') {
         return { error: 'A product with this barcode already exists' };
       }
-      return { error: error.message };
+      return { error: 'Failed to update product' };
     }
 
     revalidateTag('products', 'max');
@@ -92,7 +118,7 @@ export async function updateProduct(id: string, prevState: any, data: any) {
     revalidatePath('/employee/stock');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
 
@@ -106,13 +132,15 @@ export async function deleteProduct(id: string) {
     const supabase = await createClient();
     const { error } = await supabase.from('products').delete().eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      return { error: 'Failed to delete product' };
+    }
 
     revalidateTag('products', 'max');
     revalidatePath('/admin/products');
     revalidatePath('/employee/stock');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
