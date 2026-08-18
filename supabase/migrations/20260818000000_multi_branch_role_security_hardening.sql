@@ -108,6 +108,11 @@ returns boolean as $$
   );
 $$ language sql security definer stable set search_path = public;
 
+create or replace function public.current_user_branch_id()
+returns uuid language sql security definer stable set search_path = public as $$
+  select branch_id from public.profiles where id = auth.uid();
+$$;
+
 create or replace function public.has_branch_access(record_branch_id uuid)
 returns boolean as $$
   select exists (
@@ -246,7 +251,7 @@ create policy "Staff can view active profiles in their branch or all if admin"
   on public.profiles for select
   using (
     public.is_admin() or 
-    (public.is_active_staff() and branch_id = (select branch_id from public.profiles where id = auth.uid()))
+    (public.is_active_staff() and branch_id = public.current_user_branch_id())
   );
 
 create policy "Admins can modify profiles"
