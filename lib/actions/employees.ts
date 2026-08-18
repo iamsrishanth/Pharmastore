@@ -1,12 +1,13 @@
 'use server';
 
-import { createAdminClient, createClient, createPublicClient } from '@/lib/supabase/server';
+import { createAdminClient, createClient } from '@/lib/supabase/server';
 import { employeeSchema } from '@/lib/validation';
-import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
+import { getCurrentUser } from '@/lib/actions/auth';
 
 async function fetchEmployeesFromDb() {
   try {
-    const supabase = createPublicClient();
+    const supabase = await createClient();
     const { data, error } = await supabase
       .from('profiles')
       .select('*')
@@ -20,20 +21,17 @@ async function fetchEmployeesFromDb() {
   }
 }
 
-const getCachedEmployees = unstable_cache(
-  async () => {
-    return fetchEmployeesFromDb();
-  },
-  ['employees-list'],
-  { revalidate: 60, tags: ['employees'] }
-);
-
 export async function getEmployees() {
-  return getCachedEmployees();
+  return fetchEmployeesFromDb();
 }
 
 export async function createEmployee(prevState: any, data: any) {
   try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || currentUser.role !== 'admin') {
+      return { error: 'Unauthorized: Admin privileges required' };
+    }
+
     const parsed = employeeSchema.safeParse(data);
     if (!parsed.success) {
       return { error: parsed.error.issues[0].message };
@@ -92,6 +90,11 @@ export async function createEmployee(prevState: any, data: any) {
 
 export async function updateEmployee(id: string, prevState: any, data: any) {
   try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || currentUser.role !== 'admin') {
+      return { error: 'Unauthorized: Admin privileges required' };
+    }
+
     const parsed = employeeSchema.safeParse(data);
     if (!parsed.success) {
       return { error: parsed.error.issues[0].message };
@@ -139,6 +142,11 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
 
 export async function toggleEmployeeStatus(id: string, isActive: boolean) {
   try {
+    const currentUser = await getCurrentUser();
+    if (!currentUser || currentUser.role !== 'admin') {
+      return { error: 'Unauthorized: Admin privileges required' };
+    }
+
     const supabase = await createClient();
     const { error } = await supabase
       .from('profiles')
