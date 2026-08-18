@@ -144,18 +144,17 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
         console.error('Critical: Failed to roll back Auth user updates:', rollbackError);
       }
 
-      // If a password was updated, generate a recovery link so the user is not left in an untracked state
-      if (parsed.data.password) {
-        const { data: linkData, error: linkError } = await adminSupabase.auth.admin.generateLink({
-          type: 'recovery',
-          email: originalUser.email!,
-        });
-        if (linkError) {
-          console.error('Failed to generate recovery link during password rollback:', linkError);
-        } else if (linkData?.properties?.action_link) {
-          console.log('Recovery link generated for rollback recovery:', linkData.properties.action_link);
-        }
+      // Generate a recovery link to notify the user/allow reset since password rollback cannot be direct
+      const { data: linkData, error: linkError } = await adminSupabase.auth.admin.generateLink({
+        type: 'recovery',
+        email: originalUser.email!,
+      });
+      if (linkError) {
+        console.error('Failed to generate recovery link during password rollback:', linkError);
+      } else if (linkData?.properties?.action_link) {
+        console.log('Recovery link generated for rollback recovery:', linkData.properties.action_link);
       }
+
       return { error: profileError.message };
     }
 
