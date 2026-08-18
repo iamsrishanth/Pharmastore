@@ -152,7 +152,11 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
       if (linkError) {
         console.error('Failed to generate recovery link during password rollback:', linkError);
       } else if (linkData?.properties?.action_link) {
-        console.log('Recovery link generated for rollback recovery:', linkData.properties.action_link);
+        console.log(JSON.stringify({
+          event: 'recovery_link_generated',
+          email: originalUser.email,
+          timestamp: new Date().toISOString()
+        }));
       }
 
       return { error: profileError.message };

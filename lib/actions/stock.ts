@@ -72,7 +72,7 @@ export async function adjustStock(prevState: any, data: any) {
     ]);
 
     if (error) {
-      return { error: error.message };
+      return { error: 'Failed to adjust stock' };
     }
 
     revalidatePath('/admin/batches');
@@ -80,7 +80,7 @@ export async function adjustStock(prevState: any, data: any) {
     revalidatePath('/employee/dashboard');
     return { success: true, queued: status === 'pending' };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
 
@@ -98,7 +98,7 @@ export async function approveAdjustment(id: string) {
       .eq('id', id);
 
     if (error) {
-      return { error: error.message };
+      return { error: 'Failed to approve stock adjustment' };
     }
 
     revalidatePath('/admin/batches');
@@ -106,7 +106,7 @@ export async function approveAdjustment(id: string) {
     revalidatePath('/employee/dashboard');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
 
@@ -124,7 +124,7 @@ export async function rejectAdjustment(id: string) {
       .eq('id', id);
 
     if (error) {
-      return { error: error.message };
+      return { error: 'Failed to reject stock adjustment' };
     }
 
     revalidatePath('/admin/batches');
@@ -132,7 +132,7 @@ export async function rejectAdjustment(id: string) {
     revalidatePath('/employee/dashboard');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
 
@@ -174,7 +174,7 @@ export async function returnBatchToSupplier(batchId: string, reason: string) {
     ]);
 
     if (movementError) {
-      return { error: movementError.message };
+      return { error: 'Failed to process supplier return' };
     }
 
     revalidatePath('/admin/batches');
@@ -183,6 +183,6 @@ export async function returnBatchToSupplier(batchId: string, reason: string) {
     revalidatePath('/employee/dashboard');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }

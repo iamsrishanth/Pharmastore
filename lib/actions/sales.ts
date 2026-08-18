@@ -104,7 +104,7 @@ export async function createSale(input: CreateSaleInput) {
           .single();
 
         if (custError) {
-          return { error: `Failed to create customer: ${custError.message}` };
+          return { error: 'Failed to create customer' };
         }
         customerId = newCustomer.id;
       }
@@ -212,7 +212,7 @@ export async function createSale(input: CreateSaleInput) {
       .single();
 
     if (saleError) {
-      return { error: `Failed to register sale: ${saleError.message}` };
+      return { error: 'Failed to register sale' };
     }
 
     // 5. Create Sale Items and corresponding Stock Movements
@@ -230,7 +230,7 @@ export async function createSale(input: CreateSaleInput) {
 
       if (itemError) {
         // Rollback / Error return
-        return { error: `Failed to register sale items: ${itemError.message}` };
+        return { error: 'Failed to register sale items' };
       }
 
       // Insert stock movement (deducts quantity_available from batch via DB trigger)
@@ -248,7 +248,7 @@ export async function createSale(input: CreateSaleInput) {
       ]);
 
       if (movementError) {
-        return { error: `Failed to update ledger stock: ${movementError.message}` };
+        return { error: 'Failed to update ledger stock' };
       }
     }
 
@@ -259,6 +259,6 @@ export async function createSale(input: CreateSaleInput) {
 
     return { success: true, saleId: sale.id, invoiceNumber };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected checkout failure occurred' };
+    return { error: 'An unexpected checkout failure occurred' };
   }
 }

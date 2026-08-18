@@ -74,10 +74,10 @@ export const stockAdjustmentSchema = z.object({
 
 // Branch Schema
 export const branchSchema = z.object({
-  name: z.string().min(1, 'Branch name is required'),
+  name: z.string().min(1, 'Branch name is required').max(100, 'Branch name must be 100 characters or less'),
   code: z.string().min(1, 'Branch code is required').max(10, 'Branch code must be 10 characters or less').regex(/^[A-Z0-9-]+$/, 'Branch code must contain only alphanumeric characters or hyphens').toUpperCase(),
-  location: z.string().optional().nullable().or(z.literal('')),
-  phone: z.string().optional().nullable().or(z.literal('')),
+  location: z.string().max(255, 'Location must be 255 characters or less').optional().nullable().or(z.literal('')),
+  phone: z.string().max(20, 'Phone must be 20 characters or less').optional().nullable().or(z.literal('')),
   is_active: z.boolean().default(true),
 });
 

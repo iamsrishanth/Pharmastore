@@ -45,7 +45,7 @@ export async function createBatch(prevState: any, data: any) {
     const { error } = await supabase.from('batches').insert([batchData]);
 
     if (error) {
-      return { error: error.message };
+      return { error: 'Failed to create batch' };
     }
 
     revalidatePath('/admin/batches');
@@ -53,7 +53,7 @@ export async function createBatch(prevState: any, data: any) {
     revalidatePath('/employee/stock');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
 
@@ -76,14 +76,14 @@ export async function updateBatch(id: string, prevState: any, data: any) {
       .eq('id', id);
 
     if (error) {
-      return { error: error.message };
+      return { error: 'Failed to update batch' };
     }
 
     revalidatePath('/admin/batches');
     revalidatePath('/employee/stock');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
 
@@ -92,12 +92,14 @@ export async function deleteBatch(id: string) {
     const supabase = await createClient();
     const { error } = await supabase.from('batches').delete().eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      return { error: 'Failed to delete batch' };
+    }
 
     revalidatePath('/admin/batches');
     revalidatePath('/employee/stock');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
