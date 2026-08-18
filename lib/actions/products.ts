@@ -1,12 +1,12 @@
 'use server';
 
-import { createClient, createPublicClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { productSchema } from '@/lib/validation';
-import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 async function fetchProductsFromDb(searchQuery?: string) {
   try {
-    const supabase = createPublicClient();
+    const supabase = await createClient();
     let query = supabase.from('products').select('*').order('name', { ascending: true });
 
     if (searchQuery) {
@@ -26,19 +26,8 @@ async function fetchProductsFromDb(searchQuery?: string) {
   }
 }
 
-const getCachedProducts = unstable_cache(
-  async () => {
-    return fetchProductsFromDb();
-  },
-  ['products-list'],
-  { revalidate: 60, tags: ['products'] }
-);
-
 export async function getProducts(searchQuery?: string) {
-  if (searchQuery) {
-    return fetchProductsFromDb(searchQuery);
-  }
-  return getCachedProducts();
+  return fetchProductsFromDb(searchQuery);
 }
 
 export async function createProduct(prevState: any, data: any) {

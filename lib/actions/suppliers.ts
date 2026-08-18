@@ -1,12 +1,12 @@
 'use server';
 
-import { createClient, createPublicClient } from '@/lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { supplierSchema } from '@/lib/validation';
-import { revalidatePath, revalidateTag, unstable_cache } from 'next/cache';
+import { revalidatePath, revalidateTag } from 'next/cache';
 
 async function fetchSuppliersFromDb() {
   try {
-    const supabase = createPublicClient();
+    const supabase = await createClient();
     const { data, error } = await supabase
       .from('suppliers')
       .select('*')
@@ -20,16 +20,8 @@ async function fetchSuppliersFromDb() {
   }
 }
 
-const getCachedSuppliers = unstable_cache(
-  async () => {
-    return fetchSuppliersFromDb();
-  },
-  ['suppliers-list'],
-  { revalidate: 60, tags: ['suppliers'] }
-);
-
 export async function getSuppliers() {
-  return getCachedSuppliers();
+  return fetchSuppliersFromDb();
 }
 
 export async function createSupplier(prevState: any, data: any) {
