@@ -652,3 +652,47 @@ create trigger trigger_check_profile_update
   execute function public.check_profile_update();
 
 
+-- ============================================
+-- 12. DATA MIGRATION & BACKFILLING (SAFE MODE)
+-- ============================================
+-- Safe backfilling plan for existing records:
+-- 1. Check if an active default/HQ branch exists, or create one if none exists
+DO $$
+DECLARE
+  default_branch_id uuid;
+BEGIN
+  SELECT id INTO default_branch_id FROM public.branches WHERE is_active = true LIMIT 1;
+  IF default_branch_id IS NULL THEN
+    INSERT INTO public.branches (name, code, location, is_active)
+    VALUES ('Headquarters', 'HQ', 'Primary Office', true)
+    RETURNING id INTO default_branch_id;
+  END IF;
+
+  -- 2. Backfill existing profiles
+  UPDATE public.profiles
+  SET branch_id = default_branch_id
+  WHERE branch_id IS NULL;
+
+  -- 3. Backfill existing batches
+  UPDATE public.batches
+  SET branch_id = default_branch_id
+  WHERE branch_id IS NULL;
+
+  -- 4. Backfill existing sales
+  UPDATE public.sales
+  SET branch_id = default_branch_id
+  WHERE branch_id IS NULL;
+
+  -- 5. Backfill existing stock movements
+  UPDATE public.stock_movements
+  SET branch_id = default_branch_id
+  WHERE branch_id IS NULL;
+
+  -- 6. Backfill existing purchase orders
+  UPDATE public.purchase_orders
+  SET branch_id = default_branch_id
+  WHERE branch_id IS NULL;
+END $$;
+
+
+
