@@ -144,7 +144,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight text-slate-900">Employee Management</h1>
-          <p className="text-sm text-slate-550">Add, edit, or deactivate store operators and administrators</p>
+          <p className="text-sm text-slate-500">Add, edit, or deactivate store operators and administrators</p>
         </div>
         <button
           onClick={handleOpenAdd}
@@ -157,7 +157,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
 
       {/* Search Bar */}
       <div className="relative max-w-md">
-        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-550">
+        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-slate-500">
           <Search className="h-4 w-4" />
         </div>
         <input
@@ -165,7 +165,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
           placeholder="Search employees by name, email, phone..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+          className="block w-full rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
         />
       </div>
 
@@ -268,7 +268,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                 required
                 {...register('full_name')}
                 placeholder="e.g. Rahul Sharma"
-                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.full_name && (
                 <p className="mt-1 text-xs text-rose-600">{errors.full_name.message}</p>
@@ -284,7 +284,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                 required
                 {...register('email')}
                 placeholder="rahul@pharmastore.com"
-                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.email && (
                 <p className="mt-1 text-xs text-rose-600">{errors.email.message}</p>
@@ -300,7 +300,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                 required={!editingEmployee}
                 {...register('password')}
                 placeholder="••••••••"
-                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.password && (
                 <p className="mt-1 text-xs text-rose-600">{errors.password.message}</p>
@@ -316,7 +316,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                   type="text"
                   {...register('phone')}
                   placeholder="+91 XXXXX XXXXX"
-                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
               </div>
 
@@ -327,10 +327,10 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                 <select
                   required
                   {...register('role')}
-                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 outline-none focus:border-teal-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 outline-none focus:border-teal-500"
                 >
-                  <option value="employee" className="text-slate-850">Employee</option>
-                  <option value="admin" className="text-slate-850">Admin</option>
+                  <option value="employee" className="text-slate-800">Employee</option>
+                  <option value="admin" className="text-slate-800">Admin</option>
                 </select>
               </div>
             </div>

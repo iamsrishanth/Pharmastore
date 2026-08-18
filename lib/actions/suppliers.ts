@@ -37,18 +37,27 @@ export async function createSupplier(prevState: any, data: any) {
       return { error: parsed.error.issues[0].message };
     }
 
+    const supplierData = {
+      ...parsed.data,
+      contact_person: parsed.data.contact_person || null,
+      phone: parsed.data.phone || null,
+      email: parsed.data.email || null,
+      gstin: parsed.data.gstin || null,
+      address: parsed.data.address || null,
+    };
+
     const supabase = await createClient();
-    const { error } = await supabase.from('suppliers').insert([parsed.data]);
+    const { error } = await supabase.from('suppliers').insert([supplierData]);
 
     if (error) {
-      return { error: error.message };
+      return { error: 'Failed to create supplier' };
     }
 
     revalidateTag('suppliers', 'max');
     revalidatePath('/admin/suppliers');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
 
@@ -64,21 +73,30 @@ export async function updateSupplier(id: string, prevState: any, data: any) {
       return { error: parsed.error.issues[0].message };
     }
 
+    const supplierData = {
+      ...parsed.data,
+      contact_person: parsed.data.contact_person || null,
+      phone: parsed.data.phone || null,
+      email: parsed.data.email || null,
+      gstin: parsed.data.gstin || null,
+      address: parsed.data.address || null,
+    };
+
     const supabase = await createClient();
     const { error } = await supabase
       .from('suppliers')
-      .update(parsed.data)
+      .update(supplierData)
       .eq('id', id);
 
     if (error) {
-      return { error: error.message };
+      return { error: 'Failed to update supplier' };
     }
 
     revalidateTag('suppliers', 'max');
     revalidatePath('/admin/suppliers');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
 
@@ -92,12 +110,14 @@ export async function deleteSupplier(id: string) {
     const supabase = await createClient();
     const { error } = await supabase.from('suppliers').delete().eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      return { error: 'Failed to delete supplier' };
+    }
 
     revalidateTag('suppliers', 'max');
     revalidatePath('/admin/suppliers');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }

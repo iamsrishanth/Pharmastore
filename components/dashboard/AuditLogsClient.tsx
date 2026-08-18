@@ -100,10 +100,10 @@ export default function AuditLogsClient({ initialLogs }: AuditLogsClientProps) {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900 flex items-center gap-2">
-          <FileText className="h-6 w-6 text-teal-650" />
+          <FileText className="h-6 w-6 text-teal-600" />
           System Audit Trail
         </h1>
-        <p className="text-sm text-slate-550">
+        <p className="text-sm text-slate-500">
           Permanent history of database changes, row level additions, deletions, and operator details
         </p>
       </div>

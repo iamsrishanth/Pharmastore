@@ -61,6 +61,12 @@ export async function createBranch(prevState: any, data: any) {
       return { error: parsed.error.issues[0].message };
     }
 
+    const branchData = {
+      ...parsed.data,
+      location: parsed.data.location || null,
+      phone: parsed.data.phone || null,
+    };
+
     if (isPlaceholder) {
       // Check for code uniqueness
       if (mockBranches.some(b => b.code.toUpperCase() === parsed.data.code.toUpperCase())) {
@@ -70,8 +76,8 @@ export async function createBranch(prevState: any, data: any) {
         id: `br-${Date.now()}`,
         name: parsed.data.name,
         code: parsed.data.code,
-        location: parsed.data.location ?? null,
-        phone: parsed.data.phone ?? null,
+        location: branchData.location,
+        phone: branchData.phone,
         is_active: parsed.data.is_active ?? true,
         created_at: new Date().toISOString()
       };
@@ -82,20 +88,20 @@ export async function createBranch(prevState: any, data: any) {
     }
 
     const supabase = await createClient();
-    const { error } = await supabase.from('branches').insert([parsed.data]);
+    const { error } = await supabase.from('branches').insert([branchData]);
 
     if (error) {
       if (error.code === '23505') {
         return { error: 'A branch with this code already exists' };
       }
-      return { error: error.message };
+      return { error: 'Failed to create branch' };
     }
 
     revalidateTag('branches', 'max');
     revalidatePath('/admin/branches');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
 
@@ -111,6 +117,12 @@ export async function updateBranch(id: string, prevState: any, data: any) {
       return { error: parsed.error.issues[0].message };
     }
 
+    const branchData = {
+      ...parsed.data,
+      location: parsed.data.location || null,
+      phone: parsed.data.phone || null,
+    };
+
     if (isPlaceholder) {
       const idx = mockBranches.findIndex(b => b.id === id);
       if (idx === -1) {
@@ -124,8 +136,8 @@ export async function updateBranch(id: string, prevState: any, data: any) {
         id,
         name: parsed.data.name,
         code: parsed.data.code,
-        location: parsed.data.location ?? null,
-        phone: parsed.data.phone ?? null,
+        location: branchData.location,
+        phone: branchData.phone,
         is_active: parsed.data.is_active ?? true,
         created_at: mockBranches[idx].created_at
       };
@@ -137,21 +149,21 @@ export async function updateBranch(id: string, prevState: any, data: any) {
     const supabase = await createClient();
     const { error } = await supabase
       .from('branches')
-      .update(parsed.data)
+      .update(branchData)
       .eq('id', id);
 
     if (error) {
       if (error.code === '23505') {
         return { error: 'A branch with this code already exists' };
       }
-      return { error: error.message };
+      return { error: 'Failed to update branch' };
     }
 
     revalidateTag('branches', 'max');
     revalidatePath('/admin/branches');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
 
@@ -179,13 +191,15 @@ export async function toggleBranchStatus(id: string, is_active: boolean) {
       .update({ is_active })
       .eq('id', id);
 
-    if (error) throw error;
+    if (error) {
+      return { error: 'Failed to update branch status' };
+    }
 
     revalidateTag('branches', 'max');
     revalidatePath('/admin/branches');
     return { success: true };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected error occurred' };
+    return { error: 'An unexpected error occurred' };
   }
 }
 

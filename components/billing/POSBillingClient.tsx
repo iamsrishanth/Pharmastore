@@ -306,7 +306,7 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
         <div className="lg:col-span-2 space-y-6">
           <div className="rx-card p-6">
             <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2 mb-4">
-              <ShoppingCart className="h-5 w-5 text-teal-650" />
+              <ShoppingCart className="h-5 w-5 text-teal-600" />
               Counter Billing Terminal
             </h2>
 
@@ -360,7 +360,7 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
                       setShowProductList(false);
                     }
                   }}
-                  className="block w-full rounded-xl border border-slate-350 bg-white py-3 pl-10 pr-4 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+                  className="block w-full rounded-xl border border-slate-350 bg-white py-3 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
                 />
               </div>
 
@@ -370,7 +370,7 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
                 className="flex items-center justify-center rounded-xl bg-slate-50 hover:bg-slate-100 px-4 border border-slate-300 text-slate-700 gap-1.5 transition cursor-pointer"
                 title="Scan Barcode using Device Camera"
               >
-                <Camera className="h-5 w-5 text-teal-650" />
+                <Camera className="h-5 w-5 text-teal-600" />
                 <span className="hidden sm:inline text-xs font-semibold">Camera Scan</span>
               </button>
             </div>
@@ -441,7 +441,7 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
                             </span>
                           </td>
                           <td className="p-3 text-center">
-                            <div className="inline-flex items-center rounded-lg bg-slate-55 p-0.5 border border-slate-200">
+                            <div className="inline-flex items-center rounded-lg bg-slate-50 p-0.5 border border-slate-200">
                               <button
                                 type="button"
                                 onClick={() => updateQuantity(item.product.id, -1)}
@@ -538,7 +538,7 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
                     placeholder="Doctor Reg / Slip Ref"
                     value={prescriptionRef}
                     onChange={(e) => setPrescriptionRef(e.target.value)}
-                    className="mt-1 block w-full rounded-xl border border-rose-250 bg-white py-2 px-3 text-xs text-slate-850 placeholder-slate-400 outline-none focus:border-rose-500"
+                    className="mt-1 block w-full rounded-xl border border-rose-200 bg-white py-2 px-3 text-xs text-slate-800 placeholder-slate-400 outline-none focus:border-rose-500"
                   />
                 </div>
                 <div>
@@ -592,7 +592,7 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
 
               <div className="flex justify-between text-sm font-bold text-slate-900 border-t border-slate-100 pt-3">
                 <span>Net Total:</span>
-                <span className="font-mono text-teal-650">₹{totalAmount.toFixed(2)}</span>
+                <span className="font-mono text-teal-600">₹{totalAmount.toFixed(2)}</span>
               </div>
             </div>
 
@@ -685,7 +685,7 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
                   onClick={handlePrint}
                   className="flex w-full items-center justify-center rounded-xl bg-slate-100 border border-slate-200 hover:bg-slate-200 py-2.5 text-xs font-semibold text-slate-700 gap-1.5 transition cursor-pointer"
                 >
-                  <Printer className="h-4 w-4 text-teal-650" />
+                  <Printer className="h-4 w-4 text-teal-600" />
                   Print Thermal Invoice (Ctrl+P)
                 </button>
               )}

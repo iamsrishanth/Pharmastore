@@ -69,7 +69,7 @@ export async function createEmployee(prevState: any, data: any) {
     const { error: profileError } = await clientSupabase
       .from('profiles')
       .update({
-        phone: parsed.data.phone,
+        phone: parsed.data.phone || null,
         is_active: parsed.data.is_active,
       })
       .eq('id', userId);
@@ -129,7 +129,7 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
         full_name: parsed.data.full_name,
         email: parsed.data.email,
         role: parsed.data.role,
-        phone: parsed.data.phone,
+        phone: parsed.data.phone || null,
         is_active: parsed.data.is_active,
       })
       .eq('id', id);
@@ -142,6 +142,19 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
       const { error: rollbackError } = await adminSupabase.auth.admin.updateUserById(id, rollbackData);
       if (rollbackError) {
         console.error('Critical: Failed to roll back Auth user updates:', rollbackError);
+      }
+
+      // If a password was updated, generate a recovery link so the user is not left in an untracked state
+      if (parsed.data.password) {
+        const { data: linkData, error: linkError } = await adminSupabase.auth.admin.generateLink({
+          type: 'recovery',
+          email: originalUser.email!,
+        });
+        if (linkError) {
+          console.error('Failed to generate recovery link during password rollback:', linkError);
+        } else if (linkData?.properties?.action_link) {
+          console.log('Recovery link generated for rollback recovery:', linkData.properties.action_link);
+        }
       }
       return { error: profileError.message };
     }

@@ -577,20 +577,34 @@ returns trigger as $$
 declare
   admin_exists boolean;
 begin
-  -- Bootstrap escape hatch: check if any active admin profile exists in the system
+  -- Check if any active admin profile exists in the system
   select exists (
     select 1 from public.profiles where role = 'admin' and is_active = true
   ) into admin_exists;
 
-  -- Prevent non-admins from altering role or is_active fields
-  if admin_exists and not public.is_admin() then
-    if new.role is distinct from old.role then
-      raise exception 'Only administrators can change profile roles.';
+  if not admin_exists then
+    -- Tighten bootstrap hatch: only allow creating the first admin
+    if new.role is distinct from 'admin' or new.is_active is distinct from true then
+      raise exception 'Bootstrap phase: The first profile must be set to role = admin and is_active = true.';
     end if;
-    if new.is_active is distinct from old.is_active then
-      raise exception 'Only administrators can change profile active status.';
+    
+    -- Emit warning and log audit trail
+    raise warning 'SYSTEM BOOTSTRAP: First admin profile bootstrap initiated for user ID %', new.id;
+    
+    insert into public.audit_logs (user_id, action, entity, entity_id, new_value)
+    values (new.id, 'BOOTSTRAP', 'profiles', new.id, jsonb_build_object('role', new.role, 'is_active', new.is_active, 'bootstrap', true));
+  else
+    -- Prevent non-admins from altering role or is_active fields
+    if not public.is_admin() then
+      if new.role is distinct from old.role then
+        raise exception 'Only administrators can change profile roles.';
+      end if;
+      if new.is_active is distinct from old.is_active then
+        raise exception 'Only administrators can change profile active status.';
+      end if;
     end if;
   end if;
+  
   return new;
 end;
 $$ language plpgsql security definer;

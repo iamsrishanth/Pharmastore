@@ -300,7 +300,7 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
           placeholder="Search suppliers by name, GSTIN, phone..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="block w-full rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
+          className="block w-full rounded-xl border border-slate-300 bg-white py-2 pl-9 pr-4 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500 focus:ring-2 focus:ring-teal-500/20"
         />
       </div>
 
@@ -379,7 +379,7 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
                 required
                 {...register('name')}
                 placeholder="e.g. Apex Distributors"
-                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
               />
               {errors.name && (
                 <p className="mt-1 text-xs text-rose-600">{errors.name.message}</p>
@@ -395,7 +395,7 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
                   type="text"
                   {...register('contact_person')}
                   placeholder="e.g. Amit Patel"
-                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
               </div>
 
@@ -407,7 +407,7 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
                   type="text"
                   {...register('gstin')}
                   placeholder="e.g. 07AAAAA1111A1Z1"
-                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
               </div>
             </div>
@@ -421,7 +421,7 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
                   type="text"
                   {...register('phone')}
                   placeholder="e.g. +91 98765 43210"
-                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
               </div>
 
@@ -433,7 +433,7 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
                   type="email"
                   {...register('email')}
                   placeholder="info@apex.com"
-                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
                 />
                 {errors.email && (
                   <p className="mt-1 text-xs text-rose-600">{errors.email.message}</p>
@@ -449,7 +449,7 @@ export default function SupplierClient({ initialSuppliers }: SupplierClientProps
                 {...register('address')}
                 rows={3}
                 placeholder="Street address, City, Pin Code..."
-                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-850 placeholder-slate-400 outline-none focus:border-teal-500 resize-none"
+                className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500 resize-none"
               />
             </div>
           </div>
