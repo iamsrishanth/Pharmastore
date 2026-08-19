@@ -44,7 +44,7 @@ export async function login(prevState: any, formData: FormData) {
   }
 
   // Redirect based on role
-  if (profile.role === 'admin') {
+  if (profile.role === 'super_admin' || profile.role === 'admin') {
     redirect('/admin/dashboard');
   } else {
     redirect('/employee/dashboard');
@@ -67,6 +67,7 @@ export async function getCurrentUser() {
         email: 'admin@pharmastore.com',
         role: 'admin',
         is_active: true,
+        branch_id: null,
         created_at: new Date().toISOString()
       };
     }

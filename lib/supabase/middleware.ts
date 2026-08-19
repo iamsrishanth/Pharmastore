@@ -91,11 +91,15 @@ export async function updateSession(request: NextRequest) {
       return supabaseResponse;
     }
 
-    if (url.pathname.startsWith('/admin') && profile.role !== 'admin') {
+    if (url.pathname.startsWith('/admin') && profile.role !== 'admin' && profile.role !== 'super_admin') {
       url.pathname = '/employee/dashboard';
       return NextResponse.redirect(url);
     }
-    if (url.pathname.startsWith('/employee') && profile.role !== 'employee' && profile.role !== 'admin') {
+    if (url.pathname.startsWith('/employee') &&
+        profile.role !== 'employee' &&
+        profile.role !== 'manager' &&
+        profile.role !== 'admin' &&
+        profile.role !== 'super_admin') {
       url.pathname = '/admin/dashboard';
       return NextResponse.redirect(url);
     }

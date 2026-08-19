@@ -19,6 +19,7 @@ interface CreateSaleInput {
   discount: number;
   prescriptionRef?: string; // Reference number or description
   prescriptionUrl?: string; // Supabase Storage URL
+  branchId?: string;
 }
 
 export async function getSales() {
@@ -78,6 +79,33 @@ export async function createSale(input: CreateSaleInput) {
 
     const supabase = await createClient();
 
+    let targetBranchId: string | null = null;
+    if (currentUser.role === 'manager' || currentUser.role === 'employee') {
+      targetBranchId = currentUser.branch_id || null;
+      if (!targetBranchId) {
+        return { error: 'Your account is not assigned to any branch.' };
+      }
+    } else {
+      targetBranchId = input.branchId || currentUser.branch_id || null;
+      if (!targetBranchId) {
+        return { error: 'Please select a valid branch for this transaction.' };
+      }
+
+      // Validate the branch exists and is active in the database
+      const { data: branchCheck } = await supabase
+        .from('branches')
+        .select('is_active')
+        .eq('id', targetBranchId)
+        .single();
+
+      if (!branchCheck) {
+        return { error: 'The selected branch does not exist.' };
+      }
+      if (!branchCheck.is_active) {
+        return { error: 'The selected branch is inactive and cannot accept new sales.' };
+      }
+    }
+
     // 1. Resolve customer if details are provided
     let customerId: string | null = null;
     if (input.customerPhone) {
@@ -104,7 +132,7 @@ export async function createSale(input: CreateSaleInput) {
           .single();
 
         if (custError) {
-          return { error: `Failed to create customer: ${custError.message}` };
+          return { error: 'Failed to create customer' };
         }
         customerId = newCustomer.id;
       }
@@ -206,13 +234,14 @@ export async function createSale(input: CreateSaleInput) {
           total: finalTotal,
           payment_mode: input.paymentMode,
           created_by: currentUser.id,
+          branch_id: targetBranchId,
         },
       ])
       .select('id')
       .single();
 
     if (saleError) {
-      return { error: `Failed to register sale: ${saleError.message}` };
+      return { error: 'Failed to register sale' };
     }
 
     // 5. Create Sale Items and corresponding Stock Movements
@@ -230,7 +259,7 @@ export async function createSale(input: CreateSaleInput) {
 
       if (itemError) {
         // Rollback / Error return
-        return { error: `Failed to register sale items: ${itemError.message}` };
+        return { error: 'Failed to register sale items' };
       }
 
       // Insert stock movement (deducts quantity_available from batch via DB trigger)
@@ -244,11 +273,12 @@ export async function createSale(input: CreateSaleInput) {
           reference_type: 'sale',
           reference_id: sale.id,
           created_by: currentUser.id,
+          branch_id: targetBranchId,
         },
       ]);
 
       if (movementError) {
-        return { error: `Failed to update ledger stock: ${movementError.message}` };
+        return { error: 'Failed to update ledger stock' };
       }
     }
 
@@ -259,6 +289,6 @@ export async function createSale(input: CreateSaleInput) {
 
     return { success: true, saleId: sale.id, invoiceNumber };
   } catch (error: any) {
-    return { error: error.message || 'An unexpected checkout failure occurred' };
+    return { error: 'An unexpected checkout failure occurred' };
   }
 }

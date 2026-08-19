@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { employeeSchema } from '@/lib/validation';
+import { hasAdminRole, isSuperAdmin, isManager } from '@/lib/roles';
 import { createEmployee, updateEmployee, toggleEmployeeStatus } from '@/lib/actions/employees';
 import Modal from '@/components/ui/Modal';
 import {
@@ -24,18 +25,44 @@ interface Profile {
   full_name: string;
   email: string | null;
   role: string;
+  branch_id?: string | null;
   phone: string | null;
   is_active: boolean;
   created_at: string;
 }
 
+interface Branch {
+  id: string;
+  name: string;
+  code: string;
+  is_active: boolean;
+}
+
 interface EmployeeClientProps {
   initialEmployees: Profile[];
+  initialBranches: Branch[];
+  currentUser: { role: string; branch_id: string | null } | null;
 }
 
 type EmployeeFormData = z.infer<typeof employeeSchema>;
 
-export default function EmployeeClient({ initialEmployees }: EmployeeClientProps) {
+// Roles an actor is allowed to assign, keyed by the actor's own role.
+const assignableRolesByActor: Record<string, string[]> = {
+  super_admin: ['super_admin', 'admin', 'manager', 'employee'],
+  admin: ['manager', 'employee'],
+  manager: ['employee'],
+};
+
+export default function EmployeeClient({
+  initialEmployees,
+  initialBranches,
+  currentUser,
+}: EmployeeClientProps) {
+  const actorRole = currentUser?.role ?? 'employee';
+  const assignableRoles = assignableRolesByActor[actorRole] ?? ['employee'];
+  const isActorSuperAdmin = actorRole === 'super_admin';
+  const isActorManager = actorRole === 'manager';
+  const activeBranches = initialBranches.filter((b) => b.is_active);
   const [employees, setEmployees] = useState<Profile[]>(initialEmployees);
   const [searchQuery, setSearchQuery] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -57,6 +84,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
       password: '',
       role: 'employee',
       phone: '',
+      branch_id: '',
       is_active: true,
     },
   });
@@ -71,6 +99,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
       password: '',
       role: 'employee',
       phone: '',
+      branch_id: '',
       is_active: true,
     });
     setIsModalOpen(true);
@@ -84,8 +113,9 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
       full_name: emp.full_name,
       email: emp.email || '',
       password: '', // leave empty to not change password
-      role: emp.role as 'admin' | 'employee',
+      role: emp.role as (typeof employeeSchema._output)['role'],
       phone: emp.phone || '',
+      branch_id: emp.branch_id || '',
       is_active: emp.is_active,
     });
     setIsModalOpen(true);
@@ -178,6 +208,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                 <th className="p-4">Full Name</th>
                 <th className="p-4">Email Address</th>
                 <th className="p-4">Role Badge</th>
+                <th className="p-4">Branch</th>
                 <th className="p-4">Contact Phone</th>
                 <th className="p-4 text-center">Status</th>
                 <th className="p-4 text-right">Actions</th>
@@ -186,7 +217,7 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
             <tbody className="divide-y divide-slate-200 text-sm">
               {filteredEmployees.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-slate-500">
+                  <td colSpan={7} className="p-8 text-center text-slate-500">
                     No employees found.
                   </td>
                 </tr>
@@ -198,13 +229,20 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                     <td className="p-4">
                       <span
                         className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold tracking-wide border uppercase ${
-                          emp.role === 'admin'
+                          isSuperAdmin(emp)
+                            ? 'bg-rose-900/30 text-rose-300 border-rose-800'
+                            : hasAdminRole(emp)
                             ? 'rx-badge-success'
+                            : isManager(emp)
+                            ? 'bg-purple-900/30 text-purple-300 border-purple-800'
                             : 'rx-badge-info'
                         }`}
                       >
                         {emp.role}
                       </span>
+                    </td>
+                    <td className="p-4 text-slate-700">
+                      {initialBranches.find((b) => b.id === emp.branch_id)?.name ?? '—'}
                     </td>
                     <td className="p-4 text-slate-700">{emp.phone || 'N/A'}</td>
                     <td className="p-4 text-center">
@@ -329,9 +367,47 @@ export default function EmployeeClient({ initialEmployees }: EmployeeClientProps
                   {...register('role')}
                   className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 outline-none focus:border-teal-500"
                 >
-                  <option value="employee" className="text-slate-800">Employee</option>
-                  <option value="admin" className="text-slate-800">Admin</option>
+                  {assignableRoles.map((r) => (
+                    <option key={r} value={r} className="text-slate-800">
+                      {r === 'super_admin'
+                        ? 'Super Admin (Developer)'
+                        : r === 'admin'
+                        ? 'Admin (Store Owner)'
+                        : r === 'manager'
+                        ? 'Manager'
+                        : 'Employee'}
+                    </option>
+                  ))}
                 </select>
+              </div>
+            </div>
+
+            {isActorSuperAdmin && (
+              <p className="text-xs text-amber-600">
+                Super Admins and Admins can only be created by a Super Admin.
+              </p>
+            )}
+
+            <div className={isActorManager ? '' : 'grid grid-cols-2 gap-4'}>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  Branch {isActorManager ? '' : '(assign scope for manager / staff)'}
+                </label>
+                <select
+                  {...register('branch_id')}
+                  disabled={isActorManager}
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 outline-none focus:border-teal-500 disabled:cursor-not-allowed disabled:bg-slate-100"
+                >
+                  <option value="">{isActorManager ? 'Your assigned branch' : '— No branch —'}</option>
+                  {activeBranches.map((b) => (
+                    <option key={b.id} value={b.id} className="text-slate-800">
+                      {b.name} ({b.code})
+                    </option>
+                  ))}
+                </select>
+                {errors.branch_id && (
+                  <p className="mt-1 text-xs text-rose-600">{errors.branch_id.message}</p>
+                )}
               </div>
             </div>
 

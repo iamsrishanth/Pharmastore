@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { supplierSchema } from '@/lib/validation';
 import { revalidatePath, revalidateTag } from 'next/cache';
 import { getCurrentUser } from '@/lib/actions/auth';
+import { hasAdminRole } from '@/lib/roles';
 
 async function fetchSuppliersFromDb() {
   try {
@@ -28,7 +29,7 @@ export async function getSuppliers() {
 export async function createSupplier(prevState: any, data: any) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (!currentUser || !hasAdminRole(currentUser)) {
       return { error: 'Unauthorized: Admin privileges required' };
     }
 
@@ -64,7 +65,7 @@ export async function createSupplier(prevState: any, data: any) {
 export async function updateSupplier(id: string, prevState: any, data: any) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (!currentUser || !hasAdminRole(currentUser)) {
       return { error: 'Unauthorized: Admin privileges required' };
     }
 
@@ -103,7 +104,7 @@ export async function updateSupplier(id: string, prevState: any, data: any) {
 export async function deleteSupplier(id: string) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (!currentUser || !hasAdminRole(currentUser)) {
       return { error: 'Unauthorized: Admin privileges required' };
     }
 

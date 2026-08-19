@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { branchSchema } from '@/lib/validation';
 import { getCurrentUser } from '@/lib/actions/auth';
+import { hasAdminRole } from '@/lib/roles';
 import { revalidatePath, revalidateTag } from 'next/cache';
 
 const isPlaceholder = process.env.NEXT_PUBLIC_SUPABASE_URL?.includes('placeholder-project') && process.env.NODE_ENV !== 'production';
@@ -52,7 +53,7 @@ export async function getBranches() {
 export async function createBranch(prevState: any, data: any) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (!currentUser || !hasAdminRole(currentUser)) {
       return { error: 'Unauthorized: Admin privileges required' };
     }
 
@@ -108,7 +109,7 @@ export async function createBranch(prevState: any, data: any) {
 export async function updateBranch(id: string, prevState: any, data: any) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (!currentUser || !hasAdminRole(currentUser)) {
       return { error: 'Unauthorized: Admin privileges required' };
     }
 
@@ -170,7 +171,7 @@ export async function updateBranch(id: string, prevState: any, data: any) {
 export async function toggleBranchStatus(id: string, is_active: boolean) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser || currentUser.role !== 'admin') {
+    if (!currentUser || !hasAdminRole(currentUser)) {
       return { error: 'Unauthorized: Admin privileges required' };
     }
 
