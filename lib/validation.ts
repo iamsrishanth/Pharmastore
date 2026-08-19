@@ -14,7 +14,7 @@ export const productSchema = z.object({
   barcode: z.string().optional().nullable().or(z.literal('')),
   requires_prescription: z.boolean().default(false),
   reorder_level: z.coerce.number().int().nonnegative('Reorder level must be >= 0').default(10),
-  tax_rate: z.coerce.number().nonnegative('Tax rate must be >= 0').default(12),
+  tax_rate: z.coerce.number().refine((val) => [0, 5, 12, 18].includes(val), { message: 'GST tax rate must be a standard slab (0%, 5%, 12%, or 18%)' }).default(12),
 });
 
 // Batch Schema
@@ -81,5 +81,7 @@ export const branchSchema = z.object({
   location: z.string().max(255, 'Location must be 255 characters or less').optional().nullable().or(z.literal('')),
   phone: z.string().max(20, 'Phone must be 20 characters or less').optional().nullable().or(z.literal('')),
   is_active: z.boolean().default(true),
+  drug_licence_no: z.string().max(50, 'Drug licence number must be 50 characters or less').optional().nullable().or(z.literal('')),
+  gstin: z.string().max(15, 'GSTIN must be 15 characters or less').optional().nullable().or(z.literal('')),
 });
 

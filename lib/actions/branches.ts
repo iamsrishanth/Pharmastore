@@ -16,14 +16,16 @@ interface BranchItem {
   phone: string | null;
   is_active: boolean;
   created_at: string;
+  drug_licence_no?: string | null;
+  gstin?: string | null;
 }
 
 // In-memory mock storage for local testing
 const mockBranches: BranchItem[] = [
-  { id: 'br-1', name: 'Hyderabad Main Branch', code: 'HYD-01', location: 'Banjara Hills, Hyderabad', phone: '+91 98765 43210', is_active: true, created_at: new Date().toISOString() },
-  { id: 'br-2', name: 'Secunderabad Outlet', code: 'SEC-02', location: 'MG Road, Secunderabad', phone: '+91 98765 43211', is_active: true, created_at: new Date().toISOString() },
-  { id: 'br-3', name: 'Gachibowli Warehouse', code: 'GAC-WH', location: 'Financial District, Hyderabad', phone: '+91 98765 43212', is_active: true, created_at: new Date().toISOString() },
-  { id: 'br-4', name: 'Vijayawada Branch', code: 'VIJ-03', location: 'Benz Circle, Vijayawada', phone: '+91 98765 43213', is_active: false, created_at: new Date().toISOString() }
+  { id: 'br-1', name: 'Hyderabad Main Branch', code: 'HYD-01', location: 'Banjara Hills, Hyderabad', phone: '+91 98765 43210', is_active: true, created_at: new Date().toISOString(), drug_licence_no: 'DL-20B/1234/HYD', gstin: '36AAAAA1111A1Z1' },
+  { id: 'br-2', name: 'Secunderabad Outlet', code: 'SEC-02', location: 'MG Road, Secunderabad', phone: '+91 98765 43211', is_active: true, created_at: new Date().toISOString(), drug_licence_no: 'DL-20B/5678/SEC', gstin: '36BBBBB2222B2Z2' },
+  { id: 'br-3', name: 'Gachibowli Warehouse', code: 'GAC-WH', location: 'Financial District, Hyderabad', phone: '+91 98765 43212', is_active: true, created_at: new Date().toISOString(), drug_licence_no: 'DL-20B/9012/GAC', gstin: '36CCCCC3333C3Z3' },
+  { id: 'br-4', name: 'Vijayawada Branch', code: 'VIJ-03', location: 'Benz Circle, Vijayawada', phone: '+91 98765 43213', is_active: false, created_at: new Date().toISOString(), drug_licence_no: 'DL-20B/3456/VIJ', gstin: '37DDDDD4444D4Z4' }
 ];
 
 async function fetchBranchesFromDb() {
@@ -66,6 +68,8 @@ export async function createBranch(prevState: any, data: any) {
       ...parsed.data,
       location: parsed.data.location || null,
       phone: parsed.data.phone || null,
+      drug_licence_no: parsed.data.drug_licence_no || null,
+      gstin: parsed.data.gstin || null,
     };
 
     if (isPlaceholder) {
@@ -80,7 +84,9 @@ export async function createBranch(prevState: any, data: any) {
         location: branchData.location,
         phone: branchData.phone,
         is_active: parsed.data.is_active ?? true,
-        created_at: new Date().toISOString()
+        created_at: new Date().toISOString(),
+        drug_licence_no: branchData.drug_licence_no,
+        gstin: branchData.gstin,
       };
       mockBranches.push(newBranch);
       revalidateTag('branches', 'max');
@@ -122,6 +128,8 @@ export async function updateBranch(id: string, prevState: any, data: any) {
       ...parsed.data,
       location: parsed.data.location || null,
       phone: parsed.data.phone || null,
+      drug_licence_no: parsed.data.drug_licence_no || null,
+      gstin: parsed.data.gstin || null,
     };
 
     if (isPlaceholder) {
@@ -140,7 +148,9 @@ export async function updateBranch(id: string, prevState: any, data: any) {
         location: branchData.location,
         phone: branchData.phone,
         is_active: parsed.data.is_active ?? true,
-        created_at: mockBranches[idx].created_at
+        created_at: mockBranches[idx].created_at,
+        drug_licence_no: branchData.drug_licence_no,
+        gstin: branchData.gstin,
       };
       revalidateTag('branches', 'max');
       revalidatePath('/admin/branches');
