@@ -52,10 +52,15 @@ export async function createEmployee(prevState: any, data: any) {
       return { error: 'Unauthorized: Only administrators can create manager accounts' };
     }
 
-    // Branch check: Managers can only create staff for their own branch
-    const targetBranchId = parsed.data.branch_id || null;
-    if (currentUser.role === 'manager' && targetBranchId !== currentUser.branch_id) {
-      return { error: 'Unauthorized: Managers can only create staff for their own branch' };
+    // Branch check: Managers can only create staff for their own branch.
+    // A manager always assigns their own branch (the UI does not let them pick one),
+    // so fall back to the manager's branch when none is supplied.
+    let targetBranchId = parsed.data.branch_id || null;
+    if (currentUser.role === 'manager') {
+      targetBranchId = currentUser.branch_id || null;
+      if (!targetBranchId) {
+        return { error: 'Your account is not assigned to a branch.' };
+      }
     }
 
     const adminSupabase = await createAdminClient();
@@ -156,15 +161,16 @@ export async function updateEmployee(id: string, prevState: any, data: any) {
       return { error: 'Unauthorized: Only administrators can assign manager role' };
     }
 
-    // Manager branch check
-    const targetBranchId = parsed.data.branch_id || null;
+    // Manager branch check.
+    // A manager always operates within their own branch: the UI does not let them change
+    // the submitted branch, so when none is supplied, preserve the target's branch and
+    // fall back to the manager's own branch for the write.
+    let targetBranchId = parsed.data.branch_id || targetProfile.branch_id || null;
     if (currentUser.role === 'manager') {
       if (targetProfile.branch_id !== currentUser.branch_id) {
         return { error: 'Unauthorized: Managers can only manage staff for their own branch' };
       }
-      if (targetBranchId !== currentUser.branch_id) {
-        return { error: 'Unauthorized: Managers cannot alter branch assignments' };
-      }
+      targetBranchId = currentUser.branch_id || targetProfile.branch_id || null;
     }
     // Fetch current auth user details for rollback support
     const { data: { user: originalUser }, error: fetchUserError } = await adminSupabase.auth.admin.getUserById(id);
