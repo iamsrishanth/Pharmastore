@@ -48,6 +48,7 @@ export default function Header({ profile }: HeaderProps) {
     { href: '/admin/employees', label: 'Employees', icon: Users },
     { href: '/admin/suppliers', label: 'Suppliers', icon: Truck },
     { href: '/admin/branches', label: 'Branches', icon: Building2 },
+    { href: '/admin/reports', label: 'Reports', icon: FileSpreadsheet },
     { href: '/admin/analytics', label: 'Analytics', icon: TrendingUp },
     { href: '/admin/audit-logs', label: 'Audit Trail', icon: Activity },
     { href: '/admin/settings', label: 'Settings', icon: Settings },

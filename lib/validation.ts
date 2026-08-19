@@ -81,5 +81,7 @@ export const branchSchema = z.object({
   location: z.string().max(255, 'Location must be 255 characters or less').optional().nullable().or(z.literal('')),
   phone: z.string().max(20, 'Phone must be 20 characters or less').optional().nullable().or(z.literal('')),
   is_active: z.boolean().default(true),
+  drug_licence_no: z.string().max(50, 'Drug licence number must be 50 characters or less').optional().nullable().or(z.literal('')),
+  gstin: z.string().max(15, 'GSTIN must be 15 characters or less').optional().nullable().or(z.literal('')),
 });
 

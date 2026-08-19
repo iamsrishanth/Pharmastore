@@ -31,6 +31,8 @@ interface Branch {
   phone: string | null;
   is_active: boolean;
   created_at: string;
+  drug_licence_no?: string | null;
+  gstin?: string | null;
 }
 
 interface BranchClientProps {
@@ -67,6 +69,8 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
       location: '',
       phone: '',
       is_active: true,
+      drug_licence_no: '',
+      gstin: '',
     },
   });
 
@@ -80,6 +84,8 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
       location: '',
       phone: '',
       is_active: true,
+      drug_licence_no: '',
+      gstin: '',
     });
     setIsModalOpen(true);
   };
@@ -94,6 +100,8 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
       location: branch.location || '',
       phone: branch.phone || '',
       is_active: branch.is_active,
+      drug_licence_no: branch.drug_licence_no || '',
+      gstin: branch.gstin || '',
     });
     setIsModalOpen(true);
   };
@@ -197,6 +205,7 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
                 <th className="p-4">Branch Details</th>
                 <th className="p-4">Branch Code</th>
                 <th className="p-4">Location</th>
+                <th className="p-4">Drug Licence / GSTIN</th>
                 <th className="p-4">Contact Phone</th>
                 <th className="p-4">Status</th>
                 <th className="p-4 text-right">Actions</th>
@@ -229,6 +238,12 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
                       <div className="flex items-center gap-1">
                         <MapPin className="h-3.5 w-3.5 text-slate-400" />
                         {branch.location || 'N/A'}
+                      </div>
+                    </td>
+                    <td className="p-4 text-slate-700">
+                      <div className="text-xs">
+                        <div className="font-semibold text-slate-900">DL: {branch.drug_licence_no || 'N/A'}</div>
+                        <div className="text-slate-550 font-mono">GST: {branch.gstin || 'N/A'}</div>
                       </div>
                     </td>
                     <td className="p-4 text-slate-700">
@@ -333,6 +348,32 @@ export default function BranchClient({ initialBranches }: BranchClientProps) {
                   {...register('phone')}
                   placeholder="e.g. +91 98765 43210"
                   className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  Drug Licence No.
+                </label>
+                <input
+                  type="text"
+                  {...register('drug_licence_no')}
+                  placeholder="e.g. Form 20B/21B"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  GSTIN
+                </label>
+                <input
+                  type="text"
+                  {...register('gstin')}
+                  placeholder="e.g. 36AAAAA1111A1Z1"
+                  className="mt-1 block w-full rounded-xl border border-slate-300 bg-white py-2.5 px-3 text-sm text-slate-800 placeholder-slate-400 outline-none focus:border-teal-500 font-mono"
                 />
               </div>
             </div>

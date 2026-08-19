@@ -200,10 +200,11 @@ export async function createSale(input: CreateSaleInput) {
         };
       }
 
-      // Record allocations and compute pricing
+      // Record allocations and compute pricing using MRP-inclusive back-worked tax
       allocations.forEach((alloc) => {
-        const itemSubtotal = alloc.quantitySelected * alloc.sellingPrice;
-        const itemTax = itemSubtotal * (alloc.taxRate / 100);
+        const itemTotal = alloc.quantitySelected * alloc.sellingPrice;
+        const itemSubtotal = itemTotal / (1 + alloc.taxRate / 100);
+        const itemTax = itemTotal - itemSubtotal;
 
         totalSubtotal += itemSubtotal;
         totalTaxAmount += itemTax;
