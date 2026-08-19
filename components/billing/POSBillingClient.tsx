@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { createSale } from '@/lib/actions/sales';
+import { createSale, getSaleDetails } from '@/lib/actions/sales';
 import { getExpiryStatus } from '@/lib/utils/expiry';
 import { getCurrentUser } from '@/lib/actions/auth';
 import { getBranches } from '@/lib/actions/branches';
@@ -352,20 +352,31 @@ export default function POSBillingClient({ products }: POSBillingClientProps) {
       } else {
         setSuccessMsg(`Checkout completed successfully!`);
         setCreatedInvoiceNum(res.invoiceNumber || 'INV-TEMP');
-        setLastCreatedSale({
-          invoice_number: res.invoiceNumber || 'INV-TEMP',
-          customer_name: customerName,
-          customer_phone: customerPhone,
-          customer_address: customerAddress,
-          created_at: new Date().toISOString(),
-          subtotal,
-          tax_amount: taxAmount,
-          discount,
-          total: totalAmount,
-          payment_mode: paymentMode,
-          pharmacist_name: pharmacistName,
-          items: [...cartWithAllocations],
-        });
+        
+        // Fetch the database-authoritative sale details (resolves P4-M1)
+        if (res.saleId) {
+          const dbSale = await getSaleDetails(res.saleId);
+          if (dbSale) {
+            setLastCreatedSale(dbSale);
+          } else {
+            // Fallback to client state in case DB details fetch fails (e.g. offline placeholder mode)
+            setLastCreatedSale({
+              invoice_number: res.invoiceNumber || 'INV-TEMP',
+              customer_name: customerName,
+              customer_phone: customerPhone,
+              customer_address: customerAddress,
+              created_at: new Date().toISOString(),
+              subtotal,
+              tax_amount: taxAmount,
+              discount,
+              total: totalAmount,
+              payment_mode: paymentMode,
+              pharmacist_name: pharmacistName,
+              items: [...cartWithAllocations],
+            });
+          }
+        }
+        
         setCart([]);
         setCustomerName('');
         setCustomerPhone('');

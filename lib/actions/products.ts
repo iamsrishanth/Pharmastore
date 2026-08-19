@@ -35,8 +35,8 @@ export async function getProducts(searchQuery?: string) {
 export async function createProduct(prevState: any, data: any) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser) {
-      return { error: 'Unauthorized: Login required' };
+    if (!currentUser || !hasAdminRole(currentUser)) {
+      return { error: 'Unauthorized: Admin privileges required' };
     }
 
     const parsed = productSchema.safeParse(data);
@@ -79,8 +79,8 @@ export async function createProduct(prevState: any, data: any) {
 export async function updateProduct(id: string, prevState: any, data: any) {
   try {
     const currentUser = await getCurrentUser();
-    if (!currentUser) {
-      return { error: 'Unauthorized: Login required' };
+    if (!currentUser || !hasAdminRole(currentUser)) {
+      return { error: 'Unauthorized: Admin privileges required' };
     }
 
     const parsed = productSchema.safeParse(data);

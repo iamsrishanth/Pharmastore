@@ -166,10 +166,10 @@ export async function returnBatchToSupplier(batchId: string, reason: string) {
 
     const supabase = await createClient();
     
-    // Fetch batch available quantity first
+    // Fetch batch available quantity, supplier_id, and branch_id first
     const { data: batch, error: batchError } = await supabase
       .from('batches')
-      .select('quantity_available, supplier_id')
+      .select('quantity_available, supplier_id, branch_id')
       .eq('id', batchId)
       .single();
 
@@ -177,12 +177,18 @@ export async function returnBatchToSupplier(batchId: string, reason: string) {
       return { error: 'Batch not found' };
     }
 
+    // Branch ownership check for branch staff / managers
+    if (currentUser.role !== 'super_admin' && currentUser.role !== 'admin') {
+      if (batch.branch_id !== currentUser.branch_id) {
+        return { error: 'Unauthorized: You can only return batches belonging to your assigned branch.' };
+      }
+    }
+
     if (batch.quantity_available <= 0) {
       return { error: 'No stock available to return in this batch' };
     }
 
-    // Insert stock movement of type 'return' with negative quantity
-    // In our system, return movements log the stock exit.
+    // Insert stock movement of type 'return' with negative quantity and scoped branch_id
     const { error: movementError } = await supabase.from('stock_movements').insert([
       {
         batch_id: batchId,
@@ -191,6 +197,7 @@ export async function returnBatchToSupplier(batchId: string, reason: string) {
         status: 'approved',
         reason: reason,
         created_by: currentUser.id,
+        branch_id: batch.branch_id,
       },
     ]);
 

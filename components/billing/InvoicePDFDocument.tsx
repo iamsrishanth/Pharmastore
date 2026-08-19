@@ -266,49 +266,97 @@ export default function InvoicePDFDocument({ sale, branch }: InvoicePDFDocumentP
   // Also compile GST slab summaries
   const gstSlabs: Record<number, { taxable: number; cgst: number; sgst: number }> = {};
 
-  sale.items.forEach((item) => {
-    item.allocations.forEach((alloc) => {
-      const quantity = alloc.quantitySelected;
-      const isLoose = item.saleUnit === 'unit';
-      const packSize = item.packSize;
+  const customerName = sale.customer_name || (sale as any).customers?.name || 'Walk-in Customer';
+  const customerPhone = sale.customer_phone || (sale as any).customers?.phone || 'N/A';
+  const customerAddress = sale.customer_address || (sale as any).customers?.address || 'N/A';
+  const pharmacistName = sale.pharmacist_name || (sale as any).profiles?.full_name || 'Active Staff';
+
+  // Check if items are in the DB format
+  const isDbFormat = sale.items && sale.items.length > 0 && ('batches' in sale.items[0]);
+
+  if (isDbFormat) {
+    sale.items.forEach((dbItem: any) => {
+      const quantity = Number(dbItem.quantity);
+      const batch = dbItem.batches;
+      const product = batch?.products;
+      const packSize = parseInt(product?.pack_size || '1') || 1;
       
-      // Calculate pricing
-      const stripPrice = alloc.sellingPrice;
-      const unitPrice = isLoose ? (stripPrice / packSize) : stripPrice;
-      const itemQty = isLoose ? quantity : (quantity / packSize);
+      const isStrip = (product?.unit === 'strip' && packSize > 1 && quantity % packSize === 0);
+      const displayQty = isStrip ? (quantity / packSize) : quantity;
+      const displayUnit = isStrip ? 'strip' : (product?.unit || 'unit');
+      const unitRate = isStrip ? (Number(dbItem.unit_price) * packSize) : Number(dbItem.unit_price);
       
-      // Totals
-      const itemTotal = itemQty * stripPrice; // total paid amount for this batch line
-      const baseSubtotal = itemTotal / (1 + alloc.taxRate / 100);
+      const itemTotal = quantity * Number(dbItem.unit_price);
+      const taxRate = Number(product?.tax_rate || 12);
+      const baseSubtotal = itemTotal / (1 + taxRate / 100);
       const taxTotal = itemTotal - baseSubtotal;
-      
-      // HSN
-      const hsn = item.product.hsn_code || 'N/A';
-      
+
       invoiceLines.push({
-        name: item.product.name,
-        generic: item.product.generic_name,
-        requiresPrescription: item.product.requires_prescription,
-        hsn,
-        batchNumber: alloc.batchNumber,
-        expiryDate: alloc.expiryDate,
-        quantity: itemQty,
-        unit: isLoose ? 'tab/cap' : (item.product.unit || 'strip'),
-        price: unitPrice,
-        taxRate: alloc.taxRate,
+        name: product?.name || 'Unknown Medicine',
+        generic: product?.generic_name,
+        requiresPrescription: product?.requires_prescription || false,
+        hsn: product?.hsn_code || 'N/A',
+        batchNumber: batch?.batch_number || 'N/A',
+        expiryDate: batch?.expiry_date || 'N/A',
+        quantity: displayQty,
+        unit: displayUnit,
+        price: unitRate,
+        taxRate,
         total: itemTotal,
       });
 
-      // Aggregate GST slab
-      const slab = alloc.taxRate;
-      if (!gstSlabs[slab]) {
-        gstSlabs[slab] = { taxable: 0, cgst: 0, sgst: 0 };
+      if (!gstSlabs[taxRate]) {
+        gstSlabs[taxRate] = { taxable: 0, cgst: 0, sgst: 0 };
       }
-      gstSlabs[slab].taxable += baseSubtotal;
-      gstSlabs[slab].cgst += taxTotal / 2;
-      gstSlabs[slab].sgst += taxTotal / 2;
+      gstSlabs[taxRate].taxable += baseSubtotal;
+      gstSlabs[taxRate].cgst += taxTotal / 2;
+      gstSlabs[taxRate].sgst += taxTotal / 2;
     });
-  });
+  } else {
+    sale.items.forEach((item) => {
+      item.allocations.forEach((alloc) => {
+        const quantity = alloc.quantitySelected;
+        const isLoose = item.saleUnit === 'unit';
+        const packSize = item.packSize;
+        
+        // Calculate pricing
+        const stripPrice = alloc.sellingPrice;
+        const unitPrice = isLoose ? (stripPrice / packSize) : stripPrice;
+        const itemQty = isLoose ? quantity : (quantity / packSize);
+        
+        // Totals
+        const itemTotal = itemQty * stripPrice; // total paid amount for this batch line
+        const baseSubtotal = itemTotal / (1 + alloc.taxRate / 100);
+        const taxTotal = itemTotal - baseSubtotal;
+        
+        // HSN
+        const hsn = item.product.hsn_code || 'N/A';
+        
+        invoiceLines.push({
+          name: item.product.name,
+          generic: item.product.generic_name,
+          requiresPrescription: item.product.requires_prescription,
+          hsn,
+          batchNumber: alloc.batchNumber,
+          expiryDate: alloc.expiryDate,
+          quantity: itemQty,
+          unit: isLoose ? 'tab/cap' : (item.product.unit || 'strip'),
+          price: unitPrice,
+          taxRate: alloc.taxRate,
+          total: itemTotal,
+        });
+
+        // Aggregate GST slab
+        const slab = alloc.taxRate;
+        if (!gstSlabs[slab]) {
+          gstSlabs[slab] = { taxable: 0, cgst: 0, sgst: 0 };
+        }
+        gstSlabs[slab].taxable += baseSubtotal;
+        gstSlabs[slab].cgst += taxTotal / 2;
+        gstSlabs[slab].sgst += taxTotal / 2;
+      });
+    });
+  }
 
   return (
     <Document>
@@ -345,20 +393,20 @@ export default function InvoicePDFDocument({ sale, branch }: InvoicePDFDocumentP
           <View style={styles.billToBox}>
             <Text style={styles.sectionTitle}>Bill To (Customer)</Text>
             <Text style={styles.infoText}>
-              <Text style={styles.boldText}>Name: </Text>{sale.customer_name || 'Walk-in Customer'}
+              <Text style={styles.boldText}>Name: </Text>{customerName}
             </Text>
             <Text style={styles.infoText}>
-              <Text style={styles.boldText}>Phone: </Text>{sale.customer_phone || 'N/A'}
+              <Text style={styles.boldText}>Phone: </Text>{customerPhone}
             </Text>
             <Text style={styles.infoText}>
-              <Text style={styles.boldText}>Address: </Text>{sale.customer_address || 'N/A'}
+              <Text style={styles.boldText}>Address: </Text>{customerAddress}
             </Text>
           </View>
           
           <View style={styles.billByBox}>
             <Text style={styles.sectionTitle}>Billed By</Text>
             <Text style={styles.infoText}>
-              <Text style={styles.boldText}>Pharmacist: </Text>{sale.pharmacist_name || 'Active Staff'}
+              <Text style={styles.boldText}>Pharmacist: </Text>{pharmacistName}
             </Text>
             <Text style={styles.infoText}>
               <Text style={styles.boldText}>Branch Code: </Text>{branch.code}

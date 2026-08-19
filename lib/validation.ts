@@ -14,7 +14,7 @@ export const productSchema = z.object({
   barcode: z.string().optional().nullable().or(z.literal('')),
   requires_prescription: z.boolean().default(false),
   reorder_level: z.coerce.number().int().nonnegative('Reorder level must be >= 0').default(10),
-  tax_rate: z.coerce.number().nonnegative('Tax rate must be >= 0').default(12),
+  tax_rate: z.coerce.number().refine((val) => [0, 5, 12, 18].includes(val), { message: 'GST tax rate must be a standard slab (0%, 5%, 12%, or 18%)' }).default(12),
 });
 
 // Batch Schema
